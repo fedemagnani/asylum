@@ -1,0 +1,14 @@
+[db_config]
+postgres_host = "localhost"
+postgres_port = 5432
+postgres_user = "postgres"
+postgres_database = "asylum"
+
+[delay]
+entities_delay = 21600 # 6 hours
+transactions_delay = 2 # 2 seconds
+
+[execution_config]
+max_entities_per_thread = 20
+time_last = "1d"
+limit = 10000
