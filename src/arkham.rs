@@ -123,8 +123,8 @@ impl MyArkham {
     pub async fn retrieve_enitites(&self, limit:usize) -> Result<Vec<ArkhamEntity>, AsylumError>{
         let mut entities = HashSet::<ArkhamEntity>::new();
         let mut i = 0;
+        info!("Retrieving entities...");
         while i < limit {
-            info!("Fetching page {} of {}", i, limit);
             let url = format!("{}/tag/top?tag=fund&page={}", BASE_URL, i);
             debug!("{}", url);
             let resp = self.client.get(&url).send().await.map_err(|e| AsylumError::ReqwestError(e))?;
@@ -154,7 +154,11 @@ impl MyArkham {
         let resp = self.client.get(&url).send().await.map_err(|e| AsylumError::ReqwestError(e))?;
         let body = resp.text().await.map_err(|e| AsylumError::ReqwestError(e))?;
         let arkham_resp: serde_json::Value = serde_json::from_str(&body).map_err(|e| AsylumError::SerdeError(e))?;
-        let transfers = arkham_resp["transfers"].as_array().expect("Can't get transfers");
+        let transfers = arkham_resp["transfers"].as_array();
+        if transfers.is_none() {
+            return Err(AsylumError::ArkhamError("Can't find transfers in response".to_owned()));
+        }
+        let transfers = transfers.unwrap(); // safe unwrap because if we are here it means that transfers is not None
         for transfer in transfers {
             let hash = transfer.get("transactionHash").map(|e| e.as_str().unwrap_or("").to_owned());
             let (from_address, from_entity_id, from_entity_name, from_entity_type, from_entity_twitter, from_entity_label) = match transfer.get("fromAddress") {

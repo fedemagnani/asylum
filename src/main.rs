@@ -20,4 +20,8 @@ async fn main() {
     )
     .await;
     asylum.start().await;
+    // loop {
+    //     println!("Hello, world!");
+    //     tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+    // }
 }

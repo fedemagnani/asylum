@@ -5,7 +5,7 @@ use crate::arkham;
 
 #[derive(Debug)]
 pub enum AsylumError {
-    ArkhamError(reqwest::Error),
+    ArkhamError(String),
     PostgresError(postgres::Error),
     ReqwestError(reqwest::Error),
     SerdeError(serde_json::Error),
