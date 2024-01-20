@@ -9,36 +9,36 @@ use tokio_postgres::types::ToSql;
 pub mod arkham;
 pub mod common;
 pub mod postgres;
-
+// pub mod webbb;
+pub mod webserver;
 pub struct Asylum {
     // mpmc_sender: crossbeam_channel::Sender<common::AsylumMessage>, //probbaly not needed
     // mpmc_receiver: crossbeam_channel::Receiver<common::AsylumMessage>,
     broadcast_sender: broadcast::Sender<common::AsylumMessage>,
-    config: Arc<tokio::sync::Mutex<serde_json::Value>>,
+    config: Arc<serde_json::Value>, //this will never be changed, no reason to use a mutex
     arkham_client: arkham::MyArkham,
     postgres_client: Arc<tokio::sync::Mutex<postgres::MyPostgreSQL>>,
     task_counter: Arc<tokio::sync::Mutex<usize>>,
+    config_path: Option<String>,
+    secret_path: Option<String>,
 }
-
 impl Asylum {
     pub async fn new(
         config_path: Option<&str>,
         secret_path: Option<&str>,
-        db_name: Option<&str>,
         capacity: Option<usize>,
     ) -> Asylum {
-        let config_path = config_path.unwrap_or("Config.toml").to_owned();
+        let config_path: String = config_path.unwrap_or("Config.toml").to_owned();
         let secret_path = secret_path.unwrap_or("Secrets.toml");
-        let db_name = db_name.unwrap_or("asylum").to_owned();
         let capacity = capacity.unwrap_or(100);
         let config = common::get_config(&config_path);
-        let config = Arc::new(tokio::sync::Mutex::new(config));
+        let config = Arc::new(config);
 
         // let (sender, receiver) = unbounded::<common::AsylumMessage>();
         let (broadcast_sender, _) = broadcast::channel(capacity);
         let arkham_client = arkham::MyArkham::new(Some(secret_path.to_owned()));
         let postgres_client =
-            postgres::MyPostgreSQL::new(Some(&db_name), Some(&secret_path), Some(&config_path))
+            postgres::MyPostgreSQL::new(Some(&secret_path), Some(&config_path))
                 .await;
         let postgres_client = Arc::new(tokio::sync::Mutex::new(postgres_client));
         Asylum {
@@ -49,9 +49,10 @@ impl Asylum {
             arkham_client,
             postgres_client,
             task_counter: Arc::new(tokio::sync::Mutex::new(0)),
+            config_path: Some(config_path),
+            secret_path: Some(secret_path.to_owned()),
         }
     }
-
     pub fn print_asylum() {
         println!(" _______  _______           _                 _______ ");
         println!("(  ___  )(  ____ \\|\\     /|( \\      |\\     /|(       )");
@@ -62,7 +63,6 @@ impl Asylum {
         println!("| )   ( |/\\____) |   | |   | (____/\\| (___) || )   ( |");
         println!("|/     \\|\\_______)   \\_/   (_______/(_______)|/     \\|");
     }
-
     pub async fn create_table_entities(
         postgres_client: &mut postgres::MyPostgreSQL,
     ) -> Result<(), common::AsylumError> {
@@ -74,7 +74,6 @@ impl Asylum {
             .map_err(|e| common::AsylumError::PostgresError(e))?;
         Ok(())
     }
-
     pub async fn update_table_entities(
         postgres_client: &mut postgres::MyPostgreSQL,
         entities: Vec<arkham::ArkhamEntity>,
@@ -97,7 +96,6 @@ impl Asylum {
         }
         Ok(())
     }
-
     pub async fn create_table_transactions(
         postgres_client: &mut postgres::MyPostgreSQL,
     ) -> Result<(), common::AsylumError> {
@@ -130,7 +128,6 @@ impl Asylum {
             .map_err(|e| common::AsylumError::PostgresError(e))?;
         Ok(())
     }
-
     pub async fn update_table_transactions(
         postgres_client: &mut postgres::MyPostgreSQL,
         transactions: Vec<arkham::ArkhamTransaction>,
@@ -170,7 +167,6 @@ impl Asylum {
         }
         Ok(())
     }
-
     pub fn create_table_thread(&self) -> tokio::task::JoinHandle<()> {
         debug!("Creating tables");
         let mut postgres_client = self.postgres_client.clone();
@@ -188,14 +184,13 @@ impl Asylum {
         });
         return table_thread;
     }
-
     pub async fn transactions_manager_thread(&self) -> tokio::task::JoinHandle<()> {
         let sender = self.broadcast_sender.clone();
         let mut receiver = self.broadcast_sender.subscribe();
         // let mpmc_sender = self.mpmc_sender.clone();
         let task_counter = self.task_counter.clone();
         let config = self.config.clone();
-        let config = config.lock().await;
+        // let config = config.lock().await;
         let execution_config = &config["execution_config"];
         let delay_config = &config["delay"];
 
@@ -273,7 +268,6 @@ impl Asylum {
         });
         return transactions_manager_thread;
     }
-
     pub fn entities_thread(&self) -> tokio::task::JoinHandle<()> {
         // let sender_a = self.mpmc_sender.clone();
         let sender_a = self.broadcast_sender.clone();
@@ -283,8 +277,8 @@ impl Asylum {
         let arkham_entities_thread = tokio::spawn(async move {
             *task_counter.lock().await += 1;
             let mut past_entities = None;
-            let c = config.lock().await;
-            let delays = c
+            // let c = config.lock().await;
+            let delays = config
                 .get("delay")
                 .expect("Delays must be set in your config file");
             let entities_delay = delays
@@ -317,7 +311,6 @@ impl Asylum {
         });
         return arkham_entities_thread;
     }
-
     pub fn postgres_thread(&self) -> tokio::task::JoinHandle<()> {
         // let receiver = self.mpmc_receiver.clone();
         let mut receiver = self.broadcast_sender.subscribe();
@@ -360,7 +353,6 @@ impl Asylum {
         });
         return postgres_thread;
     }
-
     pub fn tasks_monitor_thread(&self) -> tokio::task::JoinHandle<()> {
         let task_counter = self.task_counter.clone();
         let tasks_monitor_thread = tokio::spawn(async move {
@@ -373,16 +365,36 @@ impl Asylum {
         });
         return tasks_monitor_thread;
     }
+    pub fn web_server_thread(&self) -> tokio::task::JoinHandle<()> {
+        let config = self.config.clone();
+        let config_path: Option<String> = self.config_path.clone();
+        let secret_path = self.secret_path.clone();
+        let web_server_thread = tokio::spawn(async move {
+            info!("Starting webserver");
+            // let config = config.lock().await;
+            let port = config["webserver"]["port"]
+                .as_u64()
+                .expect("Port must be set in your config file") as u16;
+            let web = webserver::WebServer::new(port);
+            web.start( secret_path.as_deref(), config_path.as_deref())
+                .await;
+            error!("Webserver stopped");
 
+        });
+        return web_server_thread;
+    }
     pub async fn start(&self) {
         // At the strtup, we connect the client, create tables if they don't exist
-
+        error!("FIX BUILDING OF SQL FILTERS");
+        error!("WEB SERVER THREAD IS BLOCKING OTHER THREADS");
+        let web_server_thread = self.web_server_thread();
         let create_table_thread = self.create_table_thread();
         let transactions_manager_thread = self.transactions_manager_thread();
         let postgres_thread = self.postgres_thread();
         let arkham_entities_thread = self.entities_thread();
         let tasks_monitor_thread = self.tasks_monitor_thread();
         let _ = tokio::join!(
+            web_server_thread,
             create_table_thread,
             transactions_manager_thread,
             postgres_thread,
@@ -391,7 +403,6 @@ impl Asylum {
         );
     }
 }
-
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 async fn test_asylum() {
     info!("Starting test");
@@ -403,14 +414,12 @@ async fn test_asylum() {
     let capacity = 10;
     let config_path = "Config.toml";
     let secret_path = "Secrets.toml";
-    let db_name = "asylum";
     let log_level = "info";
     common::init_logger(Some(log_level));
     Asylum::print_asylum();
     let asylum = Asylum::new(
         Some(config_path),
         Some(secret_path),
-        Some(db_name),
         Some(capacity),
     )
     .await;

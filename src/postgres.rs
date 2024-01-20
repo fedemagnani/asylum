@@ -9,10 +9,27 @@ pub struct MyPostgreSQL{
     pub table: Option<String>
 }
 
-impl MyPostgreSQL {
-    pub async fn new(db_name: Option<&str>, secrets_path:Option<&str>, config_path:Option<&str>) -> MyPostgreSQL {
+pub struct MyPostgreSQLSetting {
+    pub db_name: String,
+    pub host: String,
+    pub user: String,
+    pub port: u16,
+    pub password: String,
+}
+
+impl MyPostgreSQLSetting {
+    pub fn new(db_name: &str, host: &str, user: &str, port: u16, password: &str) -> MyPostgreSQLSetting {
+        MyPostgreSQLSetting {
+            db_name: db_name.to_owned(),
+            host: host.to_owned(),
+            user: user.to_owned(),
+            port,
+            password: password.to_owned(),
+        }
+    }
+
+    pub fn new_from_config(secrets_path:Option<&str>, config_path:Option<&str>) -> MyPostgreSQLSetting {
         // Postgres client params here https://docs.rs/postgres/0.19.7/postgres/config/struct.Config.html
-        info!("Fetching secrets");
         let secret_manager = get_secrets(secrets_path.unwrap_or("Secrets.toml"));
         let config_path = config_path.unwrap_or("Config.toml");
         let config = &get_config(config_path)["db_config"];
@@ -27,20 +44,29 @@ impl MyPostgreSQL {
             },
         };
         let password = secret_manager.get("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD not found in secrets file");
-        let db_name = match db_name {
+        let db_name = match config["postgres_database"].as_str() {
             Some(d) => d,
             None => {
-                warn!("No database name provided, using config file");
-                match config["postgres_database"].as_str() {
-                    Some(d) => d,
-                    None => {
-                        warn!("postgres_database not found in config file, using default postgres");
-                        let db = "postgres";
-                        db
-                    }
-                }
+                warn!("postgres_database not found in config file, using default postgres");
+                let db = "postgres";
+                db
             }
         };
+        MyPostgreSQLSetting {
+            db_name: db_name.to_owned(),
+            host: host.to_owned(),
+            user: user.to_owned(),
+            port,
+            password: password.to_owned(),
+        }
+    }
+}
+
+impl MyPostgreSQL {
+    pub async fn new(secrets_path:Option<&str>, config_path:Option<&str>) -> MyPostgreSQL {
+        // Postgres client params here https://docs.rs/postgres/0.19.7/postgres/config/struct.Config.html
+        let db_settings = MyPostgreSQLSetting::new_from_config(secrets_path, config_path);
+        let (host, user, port, password, db_name) = (db_settings.host, db_settings.user, db_settings.port, db_settings.password, db_settings.db_name);
         let pg_config = format!("host={} user={} port={} password={}", host, user, port, password);
         // let client = Client::connect(&pg_config, NoTls).expect("Failed to connect to postgres");
         let (client, connection) = tokio_postgres::connect(&pg_config, NoTls).await.expect("Failed to connect to postgres");
@@ -52,7 +78,7 @@ impl MyPostgreSQL {
         info!("Connecting to postgres and checking existence of database {}", db_name);
         // We create the dataset if it is not already created
         let mut pg = MyPostgreSQL{db_name:db_name.to_owned(), client, table:None};
-        pg.create_db(db_name).await.expect("Failed to create database");
+        pg.create_db(&db_name).await.expect("Failed to create database");
         let pg_config = format!("host={} user={} port={} password={} dbname={}", host, user, port, password, db_name);
         // let client = Client::connect(&pg_config, NoTls).expect("Failed to connect to postgres");
         let (client, connection) = tokio_postgres::connect(&pg_config, NoTls).await.expect("Failed to connect to postgres");
@@ -139,13 +165,16 @@ impl MyPostgreSQL {
         self.client.execute(command, params).await
     }
 
+    pub async fn query(&self, statement:&str) -> Result<Vec<postgres::Row>, postgres::Error> {
+        self.client.query(statement, &[]).await
+    }
 }
 
 #[tokio::test]
 async fn test_postgres() {
     init_logger(None);
     use crate::postgres::MyPostgreSQL;
-    let mut pg = MyPostgreSQL::new(None, None, None).await;
+    let mut pg = MyPostgreSQL::new(None, None).await;
     let res = pg.create_db("test").await;
     match res {
         Ok(_) => info!("Database created"),

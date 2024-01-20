@@ -12,3 +12,6 @@ transactions_delay = 2 # 2 seconds
 max_entities_per_thread = 20
 time_last = "1d"
 limit = 10000
+
+[webserver]
+port = 80

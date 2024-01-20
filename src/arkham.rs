@@ -36,7 +36,7 @@ impl std::hash::Hash for ArkhamEntity {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ArkhamTransaction {
     pub hash: Option<String>,
     pub from_address: Option<String>,

@@ -1,14 +1,22 @@
 use shuttle_secrets;
 use serde_json::{Value};
 use env_logger::Env;
+use thiserror::Error; //allows to implement conveniently the standard Error trait
 use crate::arkham;
+use crate::webserver::WebserverError;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum AsylumError {
+    #[error("Got some error interacting with Arkham server: {0}")]
     ArkhamError(String),
+    #[error("Got some error interacting with Postgres: {0}")]
     PostgresError(postgres::Error),
+    #[error("Got some error by making requests: {0}")]
     ReqwestError(reqwest::Error),
+    #[error("Got some error by making requests: {0}")]
     SerdeError(serde_json::Error),
+    #[error("Got some error in the backend server: {0}")]
+    BackendError(WebserverError),
 }
 #[derive(Clone, Debug)]
 pub enum AsylumMessage{
