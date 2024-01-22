@@ -261,7 +261,7 @@ impl Asylum {
                         }
                         Err(e) => error!("Error in fetching transactions: {:?}", e),
                     }
-                    // tokio::time::sleep(Duration::from_secs(transaction_delay as u64)).await;
+                    tokio::time::sleep(Duration::from_secs(transaction_delay as u64)).await;
                 } // Use a reference here
             }
             // *task_counter.lock().await -= 1;
@@ -375,7 +375,10 @@ impl Asylum {
             let port = config["webserver"]["port"]
                 .as_u64()
                 .expect("Port must be set in your config file") as u16;
-            let web = webserver::WebServer::new(port);
+            let limit_db_query = config["webserver"]["limit_db_query"]
+                .as_u64()
+                .expect("Limit db query must be set in your config file") as usize;
+            let web = webserver::WebServer::new(port, limit_db_query);
             web.start( secret_path.as_deref(), config_path.as_deref())
                 .await;
             error!("Webserver stopped");
@@ -386,7 +389,6 @@ impl Asylum {
     pub async fn start(&self) {
         // At the strtup, we connect the client, create tables if they don't exist
         error!("FIX BUILDING OF SQL FILTERS");
-        error!("WEB SERVER THREAD IS BLOCKING OTHER THREADS");
         let web_server_thread = self.web_server_thread();
         let create_table_thread = self.create_table_thread();
         let transactions_manager_thread = self.transactions_manager_thread();
