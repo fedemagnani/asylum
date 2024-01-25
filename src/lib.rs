@@ -388,7 +388,6 @@ impl Asylum {
     }
     pub async fn start(&self) {
         // At the strtup, we connect the client, create tables if they don't exist
-        error!("FIX BUILDING OF SQL FILTERS");
         let web_server_thread = self.web_server_thread();
         let create_table_thread = self.create_table_thread();
         let transactions_manager_thread = self.transactions_manager_thread();

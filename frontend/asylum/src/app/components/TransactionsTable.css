@@ -1,0 +1,46 @@
+table {
+    width: 100%;
+    /* Make the table take up the full width of its container */
+    table-layout: fixed;
+    /* Make columns of equal width */
+    word-wrap: break-word;
+    /* Allow long words to be able to break and wrap onto the next line */
+    /* We reduce the font size of the table to make it fit on the screen */
+    font-size: 0.8em;
+    
+    /* border: 5px solid #52ff52; */
+}
+
+
+
+th,
+td {
+    overflow: hidden;
+    /* Hide text that won't fit in the cell */
+    text-overflow: ellipsis;
+    /* Add an ellipsis (...) when the text overflows */
+    white-space: nowrap;
+    /* Prevent text from wrapping onto the next line */
+    padding: 0.5em;
+    /* All the content is displayed center
+     */
+    text-align: center;
+    border: 1px solid #000000;
+    /* Each column fits the content */
+    
+}
+
+tr:nth-child(even) {
+    background-color: #52ff52;
+    color: #000000;
+    /* Text is bold */
+    font-weight: bold;
+
+}
+
+tr:nth-child(odd) {
+    background-color: #000000;
+    color: #52ff52;
+    /* Text is bold */
+    font-weight: bold;
+}

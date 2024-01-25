@@ -4,7 +4,7 @@ use std::sync::Arc;
 use crate::arkham::ArkhamTransaction;
 use crate::{arkham::ArkhamEntity, postgres::MyPostgreSQL};
 use async_trait::async_trait;
-use log::{error, info};
+use log::{error, info, warn};
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr}; //deserialization
 use thiserror::Error;
@@ -197,6 +197,13 @@ impl WebServer {
         let client = MyPostgreSQL::new(secrets_path, config_path).await;
         let client = Arc::new(client);
         let warp_filter = self.init_routes(client);
+        
+        let cors = warp::cors()
+            .allow_any_origin()
+            .allow_headers(vec!["content-type"])
+            .allow_methods(vec!["GET", "POST", "PUT", "DELETE"]);
+        warn!("CORS enabled, this is not safe for production!");
+        let warp_filter = warp_filter.with(cors);
         warp::serve(warp_filter)
             .run(([0, 0, 0, 0], self.port))
             .await;
