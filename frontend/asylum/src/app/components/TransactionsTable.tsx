@@ -37,6 +37,9 @@ const TransactionsTable = () => {
         };
 
         fetchData();
+        const intervalId = setInterval(fetchData, 5000); // Fetch data every 5 seconds
+
+        return () => clearInterval(intervalId); // Clean up on unmount
     }, []);
 
     return (
@@ -68,19 +71,39 @@ const TransactionsTable = () => {
                     <tr key={index}>
                         <td>{transaction.block_timestamp}</td>
                         <td>{transaction.hash}</td>
-                        <td>{transaction.from_address}</td>
+                        <td>
+                            <a href={`https://debank.com/profile/${transaction.from_address}`}>
+                                {transaction.from_address}
+                            </a>
+                        </td>
                         {/* <td>{transaction.from_entity_id}</td> */}
-                        <td>{transaction.from_entity_name}</td>
+                        <td>
+                            <a href={`https://debank.com/profile/${transaction.from_address}`}>
+                                {transaction.from_entity_name}
+                            </a>
+                        </td>
                         {/* <td>{transaction.from_entity_label}</td> */}
                         {/* <td>{transaction.from_entity_type}</td> */}
                         {/* <td>{transaction.from_entity_twitter}</td> */}
-                        <td>{transaction.to_address}</td>
+                        <td>
+                            <a href={`https://debank.com/profile/${transaction.to_address}`}>
+                                {transaction.to_address}
+                            </a>
+                        </td>
                         {/* <td>{transaction.to_entity_id}</td> */}
-                        <td>{transaction.to_entity_name}</td>
+                        <td>
+                            <a href={`https://debank.com/profile/${transaction.to_address}`}>
+                                {transaction.to_entity_name}
+                            </a>
+                        </td>
                         {/* <td>{transaction.to_entity_label}</td> */}
                         {/* <td>{transaction.to_entity_type}</td> */}
                         {/* <td>{transaction.to_entity_twitter}</td> */}
-                        <td>{transaction.token_address}</td>
+                        <td>
+                            <a href={`https://debank.com/profile/${transaction.token_address}`}>
+                                {transaction.token_address}
+                            </a>
+                        </td>
                         <td>{transaction.chain}</td>
                         <td>{transaction.block_number}</td>
                         {/* <td>{transaction.block_hash}</td> */}
