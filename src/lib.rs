@@ -387,20 +387,20 @@ impl Asylum {
         return web_server_thread;
     }
     pub async fn start(&self) {
-        // At the strtup, we connect the client, create tables if they don't exist
-        let web_server_thread = self.web_server_thread();
+        // // At the strtup, we connect the client, create tables if they don't exist
+        // let web_server_thread = self.web_server_thread();
         let create_table_thread = self.create_table_thread();
         let transactions_manager_thread = self.transactions_manager_thread();
         let postgres_thread = self.postgres_thread();
         let arkham_entities_thread = self.entities_thread();
-        let tasks_monitor_thread = self.tasks_monitor_thread();
+        // let tasks_monitor_thread = self.tasks_monitor_thread();
         let _ = tokio::join!(
-            web_server_thread,
+            // web_server_thread,
             create_table_thread,
             transactions_manager_thread,
             postgres_thread,
             arkham_entities_thread,
-            tasks_monitor_thread
+            // tasks_monitor_thread
         );
     }
 }

@@ -1,7 +1,7 @@
 [db_config]
 postgres_host = "localhost"
 postgres_port = 5432
-postgres_user = "postgres"
+postgres_user = "drunnn" #make sure he has privileges to create database
 postgres_database = "asylum"
 
 [delay]

@@ -1,0 +1,659 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 1,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "filterable": true,
+              "inspect": false,
+              "minWidth": 50
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unitScale": true
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "twitter"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "",
+                      "url": "${__value.raw}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "website"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "",
+                      "url": "${__value.raw}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "name"
+              },
+              "properties": [
+                {
+                  "id": "filterable",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 11,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "pluginVersion": "10.3.1",
+        "targets": [
+          {
+            "datasource": {
+              "type": "grafana-postgresql-datasource",
+              "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT name, website, twitter \nFROM entities \nWHERE name in (${Entity:singlequote})\nORDER BY twitter DESC;",
+            "refId": "entities board",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [
+                    {
+                      "name": "name",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "website",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "twitter",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [
+                {
+                  "property": {
+                    "type": "string"
+                  },
+                  "type": "groupBy"
+                }
+              ],
+              "limit": 50
+            },
+            "table": "entities"
+          }
+        ],
+        "title": "Monitored entities",
+        "transparent": true,
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unitScale": true
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "unique_addresses"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "Debank",
+                      "url": "https://debank.com/profile/${__value.raw}"
+                    },
+                    {
+                      "targetBlank": true,
+                      "title": "MetaSleuth",
+                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "entities"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "",
+                      "url": "https://debank.com/profile/${__data.fields.unique_addresses}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "id": 3,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": false,
+              "displayName": "entities"
+            }
+          ]
+        },
+        "pluginVersion": "10.3.1",
+        "targets": [
+          {
+            "datasource": {
+              "type": "grafana-postgresql-datasource",
+              "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT from_entity_name as entities, from_address AS unique_addresses, CASE \n           WHEN chain = 'avalanche' THEN 'avalanche'\n           WHEN chain = 'base' THEN 'base'\n           WHEN chain = 'arbitrum_one' THEN 'arbitrum'\n           WHEN chain = 'ethereum' THEN 'eth'\n           WHEN chain = 'polygon' THEN 'polygon'\n           ELSE '/'\n       END AS chain FROM transactions WHERE from_entity_name IN ( ${Entity:singlequote} )\nUNION\nSELECT to_entity_name, to_address, CASE \n           WHEN chain = 'avalanche' THEN 'avalanche'\n           WHEN chain = 'base' THEN 'base'\n           WHEN chain = 'arbitrum_one' THEN 'arbitrum'\n           WHEN chain = 'ethereum' THEN 'eth'\n           WHEN chain = 'polygon' THEN 'polygon'\n           ELSE '/'\n       END AS chain FROM transactions WHERE to_entity_name IN ( ${Entity:singlequote} ) ORDER BY entities;\n\n\n",
+            "refId": "A",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [
+                {
+                  "property": {
+                    "type": "string"
+                  },
+                  "type": "groupBy"
+                }
+              ],
+              "limit": 50
+            }
+          }
+        ],
+        "title": "Panel Title",
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unitScale": true
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "from_entity_name"
+              },
+              "properties": [
+                {
+                  "id": "custom.filterable",
+                  "value": true
+                },
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "Debank",
+                      "url": "https://debank.com/profile/${__data.fields.from_address}"
+                    },
+                    {
+                      "targetBlank": true,
+                      "title": "MetaSleuth",
+                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__data.fields.from_address}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "to_entity_name"
+              },
+              "properties": [
+                {
+                  "id": "custom.filterable",
+                  "value": true
+                },
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "Debank",
+                      "url": "https://debank.com/profile/${__data.fields.to_address}"
+                    },
+                    {
+                      "targetBlank": true,
+                      "title": "MetaSleuth",
+                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__data.fields.to_address}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "token_address"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "MetaSleuth",
+                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "from_address"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "Debank",
+                      "url": "https://debank.com/profile/${__value.raw}"
+                    },
+                    {
+                      "targetBlank": true,
+                      "title": "MetaSleuth",
+                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "to_address"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "Debank",
+                      "url": "https://debank.com/profile/${__value.raw}"
+                    },
+                    {
+                      "targetBlank": true,
+                      "title": "MetaSleuth",
+                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "hash"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "Phalcon",
+                      "url": "https://phalcon.blocksec.com/explorer/tx/${__data.fields.chain}/${__value.raw}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 39,
+          "w": 24,
+          "x": 0,
+          "y": 6
+        },
+        "id": 2,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "pluginVersion": "10.3.1",
+        "targets": [
+          {
+            "datasource": {
+              "type": "grafana-postgresql-datasource",
+              "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT hash, from_entity_name,  token_address, to_entity_name, \nCASE \n           WHEN chain = 'avalanche' THEN 'avalanche'\n           WHEN chain = 'base' THEN 'base'\n           WHEN chain = 'arbitrum_one' THEN 'arbitrum'\n           WHEN chain = 'ethereum' THEN 'eth'\n           WHEN chain = 'polygon' THEN 'polygon'\n           ELSE '/'\n       END AS chain,\n       from_address, to_address\nFROM transactions WHERE (from_entity_name in (${Entity:singlequote}) OR to_entity_name in (${Entity:singlequote})) LIMIT 1000 ",
+            "refId": "transactions",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [
+                    {
+                      "name": "hash",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "from_address",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "from_entity_name",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "to_address",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "to_entity_name",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "token_address",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "chain",
+                      "type": "functionParameter"
+                    }
+                  ],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [
+                {
+                  "property": {
+                    "type": "string"
+                  },
+                  "type": "groupBy"
+                }
+              ],
+              "limit": 50
+            },
+            "table": "transactions"
+          }
+        ],
+        "title": "Panel Title",
+        "transformations": [],
+        "type": "table"
+      }
+    ],
+    "refresh": "",
+    "schemaVersion": 39,
+    "tags": [],
+    "templating": {
+      "list": [
+        {
+          "allValue": "SELECT name FROM entities",
+          "current": {
+            "selected": true,
+            "text": [
+              "1kx"
+            ],
+            "value": [
+              "1kx"
+            ]
+          },
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+          },
+          "definition": "SELECT name FROM entities",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Entity",
+          "multi": true,
+          "name": "Entity",
+          "options": [],
+          "query": "SELECT name FROM entities",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Asylum dashboard",
+    "uid": "bfcb67d2-b5c8-4f1e-b9ba-25eb66b9fbcf",
+    "version": 16,
+    "weekStart": ""
+  }

@@ -35,12 +35,23 @@ tr:nth-child(even) {
     color: #000000;
     /* Text is bold */
     font-weight: bold;
-
+}
+tr:nth-child(even):hover {
+    background-color: #2b8e2b;
+    color: #323232;
+    /* Text is bold */
+    font-weight: bold;
 }
 
 tr:nth-child(odd) {
     background-color: #000000;
     color: #52ff52;
+    /* Text is bold */
+    font-weight: bold;
+}
+tr:nth-child(odd):hover {
+    background-color: #323232;
+    color: #2b8e2b;
     /* Text is bold */
     font-weight: bold;
 }

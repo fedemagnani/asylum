@@ -67,7 +67,8 @@ impl MyPostgreSQL {
         // Postgres client params here https://docs.rs/postgres/0.19.7/postgres/config/struct.Config.html
         let db_settings = MyPostgreSQLSetting::new_from_config(secrets_path, config_path);
         let (host, user, port, password, db_name) = (db_settings.host, db_settings.user, db_settings.port, db_settings.password, db_settings.db_name);
-        let pg_config = format!("host={} user={} port={} password={}", host, user, port, password);
+        warn!("Connecting to postgres and checking existence of database {}", db_name);
+        let pg_config = format!("host={} user={} port={} password={} dbname=postgres", host, user, port, password);
         // let client = Client::connect(&pg_config, NoTls).expect("Failed to connect to postgres");
         let (client, connection) = tokio_postgres::connect(&pg_config, NoTls).await.expect("Failed to connect to postgres");
         tokio::spawn(async move {

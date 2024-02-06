@@ -1,46 +1,14 @@
 
-"use client";
+
 import { useEffect, useState } from 'react';
 import './TransactionsTable.css'; 
-
+import {fetchData} from '../utils';
+import path from 'path';
 // We reduce the dimension of the font 
 
-interface TransactionDatasetObject {
-    hash: string,
-    from_address: string,
-    from_entity_id: string,
-    from_entity_name: string,
-    from_entity_label: string,
-    from_entity_type: string,
-    from_entity_twitter: string,
-    to_address: string,
-    to_entity_id: string,
-    to_entity_name: string,
-    to_entity_label: string,
-    to_entity_type: string,
-    to_entity_twitter: string,
-    token_address: string,
-    chain: string,
-    block_number: number,
-    block_timestamp: string,
-    block_hash: string
-}
 
-const TransactionsTable = () => {
-    const [data, setData] = useState<TransactionDatasetObject[]>([]);
 
-    useEffect(() => { //triggered with rendering of component
-        const fetchData = async () => {
-            const response = await fetch('http://localhost:80/transactions');
-            const data: TransactionDatasetObject[] = await response.json();
-            setData(data);
-        };
-
-        fetchData();
-        const intervalId = setInterval(fetchData, 5000); // Fetch data every 5 seconds
-
-        return () => clearInterval(intervalId); // Clean up on unmount
-    }, []);
+const TransactionsTable: React.FC<{data: any[]}>  = ({data}) => {
 
     return (
         <table>
@@ -72,13 +40,13 @@ const TransactionsTable = () => {
                         <td>{transaction.block_timestamp}</td>
                         <td>{transaction.hash}</td>
                         <td>
-                            <a href={`https://debank.com/profile/${transaction.from_address}`}>
+                            <a  target="_blank" rel="noopener noreferrer" href={`https://debank.com/profile/${transaction.from_address}`}>
                                 {transaction.from_address}
                             </a>
                         </td>
                         {/* <td>{transaction.from_entity_id}</td> */}
                         <td>
-                            <a href={`https://debank.com/profile/${transaction.from_address}`}>
+                            <a  target="_blank" rel="noopener noreferrer" href={`https://debank.com/profile/${transaction.from_address}`}>
                                 {transaction.from_entity_name}
                             </a>
                         </td>
@@ -86,13 +54,13 @@ const TransactionsTable = () => {
                         {/* <td>{transaction.from_entity_type}</td> */}
                         {/* <td>{transaction.from_entity_twitter}</td> */}
                         <td>
-                            <a href={`https://debank.com/profile/${transaction.to_address}`}>
+                            <a  target="_blank" rel="noopener noreferrer" href={`https://debank.com/profile/${transaction.to_address}`}>
                                 {transaction.to_address}
                             </a>
                         </td>
                         {/* <td>{transaction.to_entity_id}</td> */}
                         <td>
-                            <a href={`https://debank.com/profile/${transaction.to_address}`}>
+                            <a  target="_blank" rel="noopener noreferrer" href={`https://debank.com/profile/${transaction.to_address}`}>
                                 {transaction.to_entity_name}
                             </a>
                         </td>
@@ -100,7 +68,7 @@ const TransactionsTable = () => {
                         {/* <td>{transaction.to_entity_type}</td> */}
                         {/* <td>{transaction.to_entity_twitter}</td> */}
                         <td>
-                            <a href={`https://debank.com/profile/${transaction.token_address}`}>
+                            <a  target="_blank" rel="noopener noreferrer" href={`https://debank.com/profile/${transaction.token_address}`}>
                                 {transaction.token_address}
                             </a>
                         </td>
@@ -114,4 +82,4 @@ const TransactionsTable = () => {
     );
 };
 
-export default TransactionsTable;
+export {TransactionsTable};
