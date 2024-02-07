@@ -125,6 +125,11 @@ impl WebServer {
                         .and_then(|s| s.parse::<i64>().ok()),
                     block_timestamp: row.get("block_timestamp"),
                     block_hash: row.get("block_hash"),
+                    token_name: row.get("token_name"),
+                    token_symbol: row.get("token_symbol"),
+                    token_decimals: row.get::<_, Option<String>>("token_decimals").and_then(|s| s.parse::<u8>().ok()),
+                    amount: row.get("amount"),
+                    dollar_amount: row.get("dollar_amount"),
                 };
                 tx
             })

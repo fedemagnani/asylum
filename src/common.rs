@@ -23,6 +23,7 @@ pub enum AsylumMessage{
     Entities(Vec<arkham::ArkhamEntity>),
     Transactions(Vec<arkham::ArkhamTransaction>),
     TerminateThread,
+    PortfolioHoldings(Vec<arkham::ArkhamTokenHolding>),
     // QueryInstruction()
 }
 

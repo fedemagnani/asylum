@@ -38,8 +38,7 @@ impl Asylum {
         let (broadcast_sender, _) = broadcast::channel(capacity);
         let arkham_client = arkham::MyArkham::new(Some(secret_path.to_owned()));
         let postgres_client =
-            postgres::MyPostgreSQL::new(Some(&secret_path), Some(&config_path))
-                .await;
+            postgres::MyPostgreSQL::new(Some(&secret_path), Some(&config_path)).await;
         let postgres_client = Arc::new(tokio::sync::Mutex::new(postgres_client));
         Asylum {
             // mpmc_sender: sender,
@@ -74,6 +73,97 @@ impl Asylum {
             .map_err(|e| common::AsylumError::PostgresError(e))?;
         Ok(())
     }
+    pub async fn create_table_unique_addresses(
+        postgres_client: &mut postgres::MyPostgreSQL,
+    ) -> Result<(), common::AsylumError> {
+        let table_name = "UNIQUE_ADDRESSES";
+        let columns = "name VARCHAR(255), address VARCHAR(255) , chain VARCHAR(255), PRIMARY KEY (name, address, chain)";
+        postgres_client
+            .create_table(table_name, columns)
+            .await
+            .map_err(|e| common::AsylumError::PostgresError(e))?;
+        Ok(())
+    }
+    pub async fn update_table_unique_addresses(
+        postgres_client: &mut postgres::MyPostgreSQL,
+    ) -> Result<(), common::AsylumError> {
+        //we bet on the existence of a table called entities and transactions
+        let insert_command = format!(
+            "INSERT INTO UNIQUE_ADDRESSES (name, address, chain)
+            SELECT from_entity_name as name_entity, from_address, CASE 
+                WHEN chain = 'avalanche' THEN 'avalanche'
+                WHEN chain = 'base' THEN 'base'
+                WHEN chain = 'arbitrum_one' THEN 'arbitrum'
+                WHEN chain = 'ethereum' THEN 'eth'
+                WHEN chain = 'polygon' THEN 'polygon'
+                ELSE '/'
+            END FROM transactions WHERE from_entity_name IN (SELECT name from entities)
+            UNION ALL
+            SELECT to_entity_name, to_address, CASE 
+                WHEN chain = 'avalanche' THEN 'avalanche'
+                WHEN chain = 'base' THEN 'base'
+                WHEN chain = 'arbitrum_one' THEN 'arbitrum'
+                WHEN chain = 'ethereum' THEN 'eth'
+                WHEN chain = 'polygon' THEN 'polygon'
+                ELSE '/'
+            END FROM transactions WHERE to_entity_name IN (SELECT name from entities) ON CONFLICT (name, address, chain) DO NOTHING",
+        );
+        postgres_client
+            .execute(&insert_command, &[])
+            .await
+            .map_err(|e| common::AsylumError::PostgresError(e))?;
+        Ok(())
+    }
+    pub async fn create_table_portfolio_holdings(
+        postgres_client: &mut postgres::MyPostgreSQL,
+    ) -> Result<(), common::AsylumError> {
+        let table_name = "PORTFOLIO_HOLDINGS";
+        let columns = vec![
+            "timestamp",
+            "entity_name",
+            "chain",
+            "token_name",
+            "token_symbol",
+            "balance",
+            "price",
+            "balance_in_dollars",
+        ];
+        let columns = columns.join(" VARCHAR(255), ");
+        let columns = format!("{} VARCHAR(255)", columns);
+        postgres_client
+            .create_table(table_name, columns.as_str())
+            .await
+            .map_err(|e| common::AsylumError::PostgresError(e))?;
+        Ok(())
+    }
+    pub async fn update_table_portfolio_holdings(
+        postgres_client: &mut postgres::MyPostgreSQL,
+        portfolio_holdings: Vec<arkham::ArkhamTokenHolding>,
+    ) -> Result<(), common::AsylumError> {
+        let timestamp_millis = chrono::Utc::now().timestamp_millis();
+        for holding in portfolio_holdings {
+            let insert_command = format!(
+            "INSERT INTO {} (timestamp, entity_name, chain, token_name, token_symbol, balance, price, balance_in_dollars) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING",
+            "PORTFOLIO_HOLDINGS"
+        );
+            let params: &[&(dyn ToSql + Sync)] = &[
+                &timestamp_millis.to_string(),
+                &holding.entity_name.unwrap_or_default(),
+                &holding.chain.unwrap_or_default(),
+                &holding.token_name.unwrap_or_default(),
+                &holding.token_symbol.unwrap_or_default(),
+                &holding.token_balance.unwrap_or_default(),
+                &holding.token_price.unwrap_or_default(),
+                &holding.token_balance_usd.unwrap_or_default(),
+            ];
+            postgres_client
+                .execute(insert_command.as_str(), params)
+                .await
+                .map_err(|e| common::AsylumError::PostgresError(e))?;
+        }
+        Ok(())
+    }
+
     pub async fn update_table_entities(
         postgres_client: &mut postgres::MyPostgreSQL,
         entities: Vec<arkham::ArkhamEntity>,
@@ -116,6 +206,11 @@ impl Asylum {
             "to_entity_type VARCHAR(255)",
             "to_entity_twitter VARCHAR(255)",
             "token_address VARCHAR(255)",
+            "token_name VARCHAR(255)",
+            "token_symbol VARCHAR(255)",
+            "token_decimals VARCHAR(255)",
+            "amount VARCHAR(255)",
+            "dollar_amount VARCHAR(255)",
             "chain VARCHAR(255)",
             "block_number VARCHAR(255)",
             "block_timestamp VARCHAR(255)",
@@ -134,7 +229,7 @@ impl Asylum {
     ) -> Result<(), common::AsylumError> {
         for transaction in transactions {
             let insert_command = format!(
-            "INSERT INTO {} (hash, from_address, from_entity_id, from_entity_name, from_entity_label, from_entity_type, from_entity_twitter, to_address, to_entity_id, to_entity_name, to_entity_label, to_entity_type, to_entity_twitter, token_address, chain, block_number, block_timestamp, block_hash) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) ON CONFLICT DO NOTHING",
+            "INSERT INTO {} (hash, from_address, from_entity_id, from_entity_name, from_entity_label, from_entity_type, from_entity_twitter, to_address, to_entity_id, to_entity_name, to_entity_label, to_entity_type, to_entity_twitter, token_address, token_name, token_symbol, token_decimals, amount, dollar_amount, chain, block_number, block_timestamp, block_hash) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23) ON CONFLICT DO NOTHING",
             "TRANSACTIONS"
         );
             let params: &[&(dyn ToSql + Sync)] = &[
@@ -152,6 +247,14 @@ impl Asylum {
                 &transaction.to_entity_type.unwrap_or_default(),
                 &transaction.to_entity_twitter.unwrap_or_default(),
                 &transaction.token_address.unwrap_or_default(),
+                &transaction.token_name.unwrap_or_default(),
+                &transaction.token_symbol.unwrap_or_default(),
+                &transaction
+                    .token_decimals
+                    .map(|num| num.to_string())
+                    .unwrap_or_default(),
+                &transaction.amount.unwrap_or_default(),
+                &transaction.dollar_amount.unwrap_or_default(),
                 &transaction.chain.unwrap_or_default(),
                 &transaction
                     .block_number
@@ -167,20 +270,46 @@ impl Asylum {
         }
         Ok(())
     }
+    pub async fn delete_old_data(
+        postgres_client: &mut postgres::MyPostgreSQL,
+        drop_seconds_transactions: i64,
+        drop_seconds_portfolio: i64,
+    ) -> Result<(), common::AsylumError> {
+        let drop_seconds_transactions = drop_seconds_transactions.to_string();
+        let drop_seconds_portfolio = drop_seconds_portfolio.to_string();
+        let delete_command = format!("DELETE FROM TRANSACTIONS WHERE TO_TIMESTAMP(block_timestamp, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') < NOW() - INTERVAL '{} SECONDS'", drop_seconds_transactions);
+        postgres_client
+            .execute(delete_command.as_str(), &[])
+            .await
+            .map_err(|e| common::AsylumError::PostgresError(e))?;
+        let delete_command = format!("DELETE FROM PORTFOLIO_HOLDINGS WHERE TO_TIMESTAMP((timestamp::bigint) / 1000.0) < NOW() - INTERVAL '{} SECONDS'", drop_seconds_portfolio);
+        postgres_client
+            .execute(delete_command.as_str(), &[])
+            .await
+            .map_err(|e| common::AsylumError::PostgresError(e))?;
+        Ok(())
+    } // in the same operation we delete older transactions
+
     pub fn create_table_thread(&self) -> tokio::task::JoinHandle<()> {
         debug!("Creating tables");
-        let mut postgres_client = self.postgres_client.clone();
-        let task_counter = self.task_counter.clone();
+        let postgres_client = self.postgres_client.clone();
+        
         let table_thread = tokio::spawn(async move {
-            *task_counter.lock().await += 1;
+            
             let mut postgres_client = postgres_client.lock().await;
             Asylum::create_table_entities(&mut postgres_client)
                 .await
-                .unwrap();
+                .expect("Error creating table entities");
             Asylum::create_table_transactions(&mut postgres_client)
                 .await
-                .unwrap();
-            *task_counter.lock().await -= 1;
+                .expect("Error creating table transactions");
+            Asylum::create_table_unique_addresses(&mut postgres_client)
+                .await
+                .expect("Error creating table unique addresses");
+            Asylum::create_table_portfolio_holdings(&mut postgres_client)
+                .await
+                .expect("Error creating table portfolio holdings");
+            
         });
         return table_thread;
     }
@@ -188,7 +317,7 @@ impl Asylum {
         let sender = self.broadcast_sender.clone();
         let mut receiver = self.broadcast_sender.subscribe();
         // let mpmc_sender = self.mpmc_sender.clone();
-        let task_counter = self.task_counter.clone();
+        
         let config = self.config.clone();
         // let config = config.lock().await;
         let execution_config = &config["execution_config"];
@@ -224,7 +353,7 @@ impl Asylum {
 
         let arkham_client = self.arkham_client.clone();
         let transactions_manager_thread = tokio::spawn(async move {
-            *task_counter.lock().await += 1;
+            
             let mut entities_chunks: Vec<Vec<ArkhamEntity>> = Vec::new();
             loop {
                 if let Ok(am) = receiver.try_recv() {
@@ -254,7 +383,7 @@ impl Asylum {
                         Ok(transactions) => {
                             sender
                                 .send(common::AsylumMessage::Transactions(transactions))
-                                .unwrap();
+                                .expect("Error sending thread message with transactions");
                             // mpmc_sender
                             //     .send(common::AsylumMessage::Transactions(transactions))
                             //     .unwrap();
@@ -264,7 +393,7 @@ impl Asylum {
                     tokio::time::sleep(Duration::from_secs(transaction_delay as u64)).await;
                 } // Use a reference here
             }
-            // *task_counter.lock().await -= 1;
+            // 
         });
         return transactions_manager_thread;
     }
@@ -273,9 +402,9 @@ impl Asylum {
         let sender_a = self.broadcast_sender.clone();
         let config = self.config.clone();
         let arkham = self.arkham_client.clone();
-        let task_counter = self.task_counter.clone();
+        
         let arkham_entities_thread = tokio::spawn(async move {
-            *task_counter.lock().await += 1;
+            
             let mut past_entities = None;
             // let c = config.lock().await;
             let delays = config
@@ -301,25 +430,90 @@ impl Asylum {
                         past_entities = Some(entities.clone());
                         sender_a
                             .send(common::AsylumMessage::Entities(entities))
-                            .unwrap();
+                            .expect("Error sending thread message with entities");
                     }
                     Err(e) => error!("Error: {:?}", e),
                 }
                 tokio::time::sleep(Duration::from_secs(entities_delay)).await;
             }
-            *task_counter.lock().await -= 1;
+            
         });
         return arkham_entities_thread;
     }
+
+    pub fn portfolio_holdings_thread(&self) -> tokio::task::JoinHandle<()> {
+        let sender = self.broadcast_sender.clone();
+        let mut receiver = self.broadcast_sender.subscribe();
+        let arkham = self.arkham_client.clone();
+        
+        let config = self.config.clone();
+        let portfolio_holdings_thread = tokio::spawn(async move {
+            
+            let delays = config
+                .get("delay")
+                .expect("Delays must be set in your config file");
+            let portfolio_holdings_delay = delays
+                .get("portfolio_holdings_delay")
+                .expect("Portfolio holdings delay must be set in your config file");
+            let portfolio_holdings_delay = portfolio_holdings_delay
+                .as_i64()
+                .expect("Portfolio holdings delay must be an integer");
+            let portfolio_holdings_delay = portfolio_holdings_delay as u64;
+            loop {
+                let mut len = 0;
+                if let Ok(holdings) = receiver.try_recv() {
+                    match holdings {
+                        common::AsylumMessage::Entities(entities) => {
+                            len = entities.len();
+                            let entities: Vec<ArkhamEntity> = entities.iter().cloned().collect(); // Clone each entity
+                            for entity in entities {
+                                let holdings = arkham.retrieve_portfolio(&entity).await;
+                                match holdings {
+                                    Ok(holdings) => {
+                                        sender
+                                            .send(common::AsylumMessage::PortfolioHoldings(holdings))
+                                            .expect("Error sending thread message with portfolio holdings");
+                                    }
+                                    Err(e) => {
+                                        error!("Error in fetching portfolio holdings: {:?}", e)
+                                    }
+                                }
+                                tokio::time::sleep(Duration::from_secs(portfolio_holdings_delay))
+                                    .await;
+                            }
+                        }
+                        _ => (),
+                    }
+                    info!("Updated portfolio holdings for {:?} entities", len);
+                }
+            }
+            
+        });
+        return portfolio_holdings_thread;
+    }
+
     pub fn postgres_thread(&self) -> tokio::task::JoinHandle<()> {
         // let receiver = self.mpmc_receiver.clone();
         let mut receiver = self.broadcast_sender.subscribe();
         let postgres_client = self.postgres_client.clone();
-        let task_counter = self.task_counter.clone();
+        
+        let config = self.config.clone();
+        let execution_config = &config["execution_config"];
+        let drop_seconds_transactions = execution_config
+            .get("drop_seconds_transactions")
+            .expect("Drop seconds transactions must be set in your config file")
+            .as_i64()
+            .expect("Drop seconds transactions must be an integer");
+        let drop_seconds_portfolio = execution_config
+            .get("drop_seconds_portfolio")
+            .expect("Drop seconds portfolio must be set in your config file")
+            .as_i64()
+            .expect("Drop seconds portfolio must be an integer");
         let postgres_thread = tokio::spawn(async move {
-            *task_counter.lock().await += 1;
+            
             let mut postgres_client = postgres_client.lock().await;
 
+            //maybe a bottleneck here -> this resource will keep postgres_client busy (locked) and so it will not be able to be used by other threads, so we need to remove old datas from here. We avoid to create a dedicated thread to not increase the queue in the broadcast channel, so we remove old data when we update entities (which we are going to update more frequently)
             loop {
                 if let Ok(am) = receiver.recv().await {
                     match am {
@@ -331,6 +525,16 @@ impl Asylum {
                                 Ok(_) => info!("Entities updated"),
                                 Err(e) => error!("Error updating entities: {:?}", e),
                             }
+                            match Asylum::delete_old_data(
+                                &mut postgres_client,
+                                drop_seconds_transactions,
+                                drop_seconds_portfolio,
+                            )
+                            .await {
+                                Ok(_) => info!("Old data deleted"),
+                                Err(e) => error!("Error deleting old data: {:?}", e),
+                            }
+
                         }
                         common::AsylumMessage::Transactions(transactions) => {
                             debug!("{:?}", transactions.len());
@@ -340,30 +544,41 @@ impl Asylum {
                             )
                             .await
                             {
-                                Ok(_) => info!("Transactions updated"),
+                                Ok(_) => {
+                                    info!("Transactions updated");
+                                    match Asylum::update_table_unique_addresses(
+                                        &mut postgres_client,
+                                    )
+                                    .await
+                                    {
+                                        Ok(_) => info!("Unique addresses updated"),
+                                        Err(e) => {
+                                            error!("Error updating unique addresses: {:?}", e)
+                                        }
+                                    }
+                                }
                                 Err(e) => error!("Error updating transactions: {:?}", e),
                             }
                         }
-                        // common::AsylumMessage::TerminateThread => break,
+                        common::AsylumMessage::PortfolioHoldings(holdings) => {
+                            debug!("{:?}", holdings.len());
+                            match Asylum::update_table_portfolio_holdings(
+                                &mut postgres_client,
+                                holdings,
+                            )
+                            .await
+                            {
+                                Ok(_) => info!("Portfolio holdings updated"),
+                                Err(e) => error!("Error updating portfolio holdings: {:?}", e),
+                            }
+                        }
                         _ => (),
                     }
                 }
             }
-            // *task_counter.lock().await -= 1;
+            // 
         });
         return postgres_thread;
-    }
-    pub fn tasks_monitor_thread(&self) -> tokio::task::JoinHandle<()> {
-        let task_counter = self.task_counter.clone();
-        let tasks_monitor_thread = tokio::spawn(async move {
-            *task_counter.lock().await += 1;
-            loop {
-                info!("Number of tasks: {}", *task_counter.lock().await);
-                tokio::time::sleep(Duration::from_secs(5)).await;
-            }
-            // *task_counter.lock().await -= 1;
-        });
-        return tasks_monitor_thread;
     }
     pub fn web_server_thread(&self) -> tokio::task::JoinHandle<()> {
         let config = self.config.clone();
@@ -377,12 +592,12 @@ impl Asylum {
                 .expect("Port must be set in your config file") as u16;
             let limit_db_query = config["webserver"]["limit_db_query"]
                 .as_u64()
-                .expect("Limit db query must be set in your config file") as usize;
+                .expect("Limit db query must be set in your config file")
+                as usize;
             let web = webserver::WebServer::new(port, limit_db_query);
-            web.start( secret_path.as_deref(), config_path.as_deref())
+            web.start(secret_path.as_deref(), config_path.as_deref())
                 .await;
             error!("Webserver stopped");
-
         });
         return web_server_thread;
     }
@@ -393,14 +608,14 @@ impl Asylum {
         let transactions_manager_thread = self.transactions_manager_thread();
         let postgres_thread = self.postgres_thread();
         let arkham_entities_thread = self.entities_thread();
-        // let tasks_monitor_thread = self.tasks_monitor_thread();
+        let portfolio_holdings_thread = self.portfolio_holdings_thread();
         let _ = tokio::join!(
             // web_server_thread,
             create_table_thread,
             transactions_manager_thread,
             postgres_thread,
             arkham_entities_thread,
-            // tasks_monitor_thread
+            portfolio_holdings_thread
         );
     }
 }
@@ -418,11 +633,6 @@ async fn test_asylum() {
     let log_level = "info";
     common::init_logger(Some(log_level));
     Asylum::print_asylum();
-    let asylum = Asylum::new(
-        Some(config_path),
-        Some(secret_path),
-        Some(capacity),
-    )
-    .await;
+    let asylum = Asylum::new(Some(config_path), Some(secret_path), Some(capacity)).await;
     asylum.start().await;
 }

@@ -5,13 +5,16 @@ postgres_user = "drunnn" #make sure he has privileges to create database
 postgres_database = "asylum"
 
 [delay]
-entities_delay = 21600 # 6 hours
-transactions_delay = 2 # 2 seconds
+entities_delay = 3600 # 1 hour -> updates entities and drop old data from db
+transactions_delay = 2 # 2 seconds -> fetches next chunk of entities transaction
+portfolio_holdings_delay = 1 # 2 seconds -> fetches next entity portfolio holding
 
 [execution_config]
 max_entities_per_thread = 20
 time_last = "1d"
 limit = 10000
+drop_seconds_transactions = 86400 # 1 day
+drop_seconds_portfolio = 604800 # 1 week
 
 [webserver]
 port = 80
