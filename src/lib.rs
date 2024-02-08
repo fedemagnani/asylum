@@ -139,13 +139,14 @@ impl Asylum {
     pub async fn update_table_portfolio_holdings(
         postgres_client: &mut postgres::MyPostgreSQL,
         portfolio_holdings: Vec<arkham::ArkhamTokenHolding>,
+        timestamp_millis: i64,
     ) -> Result<(), common::AsylumError> {
-        let timestamp_millis = chrono::Utc::now().timestamp_millis();
         for holding in portfolio_holdings {
             let insert_command = format!(
             "INSERT INTO {} (timestamp, entity_name, chain, token_name, token_symbol, balance, price, balance_in_dollars) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING",
             "PORTFOLIO_HOLDINGS"
         );
+            // let timestamp_millis = chrono::Utc::now().timestamp_millis();
             let params: &[&(dyn ToSql + Sync)] = &[
                 &timestamp_millis.to_string(),
                 &holding.entity_name.unwrap_or_default(),
@@ -358,7 +359,7 @@ impl Asylum {
             loop {
                 if let Ok(am) = receiver.try_recv() {
                     match am {
-                        common::AsylumMessage::Entities(entities) => {
+                        common::AsylumMessage::Entities(entities, _) => {
                             info!("Received  {:?} entites", entities.len());
                             let entities: Vec<ArkhamEntity> = entities.iter().cloned().collect(); // Clone each entity
                             let chunks: Vec<Vec<ArkhamEntity>> = entities
@@ -419,6 +420,7 @@ impl Asylum {
             let entities_delay = entities_delay as u64;
             loop {
                 let entities = arkham.retrieve_enitites(50).await;
+                let timestamp_millis = chrono::Utc::now().timestamp_millis();
                 match entities {
                     Ok(entities) => {
                         if let Some(past_entities) = &past_entities {
@@ -429,7 +431,7 @@ impl Asylum {
                         }
                         past_entities = Some(entities.clone());
                         sender_a
-                            .send(common::AsylumMessage::Entities(entities))
+                            .send(common::AsylumMessage::Entities(entities, timestamp_millis))
                             .expect("Error sending thread message with entities");
                     }
                     Err(e) => error!("Error: {:?}", e),
@@ -463,15 +465,16 @@ impl Asylum {
                 let mut len = 0;
                 if let Ok(holdings) = receiver.try_recv() {
                     match holdings {
-                        common::AsylumMessage::Entities(entities) => {
+                        common::AsylumMessage::Entities(entities, timestamp_millis) => {
                             len = entities.len();
                             let entities: Vec<ArkhamEntity> = entities.iter().cloned().collect(); // Clone each entity
+
                             for entity in entities {
                                 let holdings = arkham.retrieve_portfolio(&entity).await;
                                 match holdings {
                                     Ok(holdings) => {
                                         sender
-                                            .send(common::AsylumMessage::PortfolioHoldings(holdings))
+                                            .send(common::AsylumMessage::PortfolioHoldings(holdings, timestamp_millis))
                                             .expect("Error sending thread message with portfolio holdings");
                                     }
                                     Err(e) => {
@@ -517,7 +520,7 @@ impl Asylum {
             loop {
                 if let Ok(am) = receiver.recv().await {
                     match am {
-                        common::AsylumMessage::Entities(entities) => {
+                        common::AsylumMessage::Entities(entities, _) => {
                             debug!("{:?}", entities.len());
                             match Asylum::update_table_entities(&mut postgres_client, entities)
                                 .await
@@ -560,11 +563,12 @@ impl Asylum {
                                 Err(e) => error!("Error updating transactions: {:?}", e),
                             }
                         }
-                        common::AsylumMessage::PortfolioHoldings(holdings) => {
+                        common::AsylumMessage::PortfolioHoldings(holdings, timestamp_millis) => {
                             debug!("{:?}", holdings.len());
                             match Asylum::update_table_portfolio_holdings(
                                 &mut postgres_client,
                                 holdings,
+                                timestamp_millis
                             )
                             .await
                             {

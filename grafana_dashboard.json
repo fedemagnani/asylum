@@ -1,659 +1,1763 @@
 {
-    "annotations": {
-      "list": [
-        {
-          "builtIn": 1,
-          "datasource": {
-            "type": "grafana",
-            "uid": "-- Grafana --"
-          },
-          "enable": true,
-          "hide": true,
-          "iconColor": "rgba(0, 211, 255, 1)",
-          "name": "Annotations & Alerts",
-          "type": "dashboard"
-        }
-      ]
-    },
-    "editable": true,
-    "fiscalYearStartMonth": 0,
-    "graphTooltip": 0,
-    "id": 1,
-    "links": [],
-    "liveNow": false,
-    "panels": [
+  "annotations": {
+    "list": [
       {
+        "builtIn": 1,
         "datasource": {
-          "type": "grafana-postgresql-datasource",
-          "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+          "type": "grafana",
+          "uid": "-- Grafana --"
         },
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "custom": {
-              "align": "auto",
-              "cellOptions": {
-                "type": "auto"
-              },
-              "filterable": true,
-              "inspect": false,
-              "minWidth": 50
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unitScale": true
-          },
-          "overrides": [
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "twitter"
-              },
-              "properties": [
-                {
-                  "id": "links",
-                  "value": [
-                    {
-                      "targetBlank": true,
-                      "title": "",
-                      "url": "${__value.raw}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "website"
-              },
-              "properties": [
-                {
-                  "id": "links",
-                  "value": [
-                    {
-                      "targetBlank": true,
-                      "title": "",
-                      "url": "${__value.raw}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "name"
-              },
-              "properties": [
-                {
-                  "id": "filterable",
-                  "value": true
-                }
-              ]
-            }
-          ]
-        },
-        "gridPos": {
-          "h": 6,
-          "w": 11,
-          "x": 0,
-          "y": 0
-        },
-        "id": 1,
-        "options": {
-          "cellHeight": "sm",
-          "footer": {
-            "countRows": false,
-            "fields": "",
-            "reducer": [
-              "sum"
-            ],
-            "show": false
-          },
-          "showHeader": true
-        },
-        "pluginVersion": "10.3.1",
-        "targets": [
-          {
-            "datasource": {
-              "type": "grafana-postgresql-datasource",
-              "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
-            },
-            "editorMode": "code",
-            "format": "table",
-            "rawQuery": true,
-            "rawSql": "SELECT name, website, twitter \nFROM entities \nWHERE name in (${Entity:singlequote})\nORDER BY twitter DESC;",
-            "refId": "entities board",
-            "sql": {
-              "columns": [
-                {
-                  "parameters": [
-                    {
-                      "name": "name",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                },
-                {
-                  "parameters": [
-                    {
-                      "name": "website",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                },
-                {
-                  "parameters": [
-                    {
-                      "name": "twitter",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                }
-              ],
-              "groupBy": [
-                {
-                  "property": {
-                    "type": "string"
-                  },
-                  "type": "groupBy"
-                }
-              ],
-              "limit": 50
-            },
-            "table": "entities"
-          }
-        ],
-        "title": "Monitored entities",
-        "transparent": true,
-        "type": "table"
-      },
-      {
-        "datasource": {
-          "type": "grafana-postgresql-datasource",
-          "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "custom": {
-              "align": "auto",
-              "cellOptions": {
-                "type": "auto"
-              },
-              "inspect": false
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unitScale": true
-          },
-          "overrides": [
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "unique_addresses"
-              },
-              "properties": [
-                {
-                  "id": "links",
-                  "value": [
-                    {
-                      "targetBlank": true,
-                      "title": "Debank",
-                      "url": "https://debank.com/profile/${__value.raw}"
-                    },
-                    {
-                      "targetBlank": true,
-                      "title": "MetaSleuth",
-                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "entities"
-              },
-              "properties": [
-                {
-                  "id": "links",
-                  "value": [
-                    {
-                      "targetBlank": true,
-                      "title": "",
-                      "url": "https://debank.com/profile/${__data.fields.unique_addresses}"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        "gridPos": {
-          "h": 6,
-          "w": 12,
-          "x": 12,
-          "y": 0
-        },
-        "id": 3,
-        "options": {
-          "cellHeight": "sm",
-          "footer": {
-            "countRows": false,
-            "fields": "",
-            "reducer": [
-              "sum"
-            ],
-            "show": false
-          },
-          "showHeader": true,
-          "sortBy": [
-            {
-              "desc": false,
-              "displayName": "entities"
-            }
-          ]
-        },
-        "pluginVersion": "10.3.1",
-        "targets": [
-          {
-            "datasource": {
-              "type": "grafana-postgresql-datasource",
-              "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
-            },
-            "editorMode": "code",
-            "format": "table",
-            "rawQuery": true,
-            "rawSql": "SELECT from_entity_name as entities, from_address AS unique_addresses, CASE \n           WHEN chain = 'avalanche' THEN 'avalanche'\n           WHEN chain = 'base' THEN 'base'\n           WHEN chain = 'arbitrum_one' THEN 'arbitrum'\n           WHEN chain = 'ethereum' THEN 'eth'\n           WHEN chain = 'polygon' THEN 'polygon'\n           ELSE '/'\n       END AS chain FROM transactions WHERE from_entity_name IN ( ${Entity:singlequote} )\nUNION\nSELECT to_entity_name, to_address, CASE \n           WHEN chain = 'avalanche' THEN 'avalanche'\n           WHEN chain = 'base' THEN 'base'\n           WHEN chain = 'arbitrum_one' THEN 'arbitrum'\n           WHEN chain = 'ethereum' THEN 'eth'\n           WHEN chain = 'polygon' THEN 'polygon'\n           ELSE '/'\n       END AS chain FROM transactions WHERE to_entity_name IN ( ${Entity:singlequote} ) ORDER BY entities;\n\n\n",
-            "refId": "A",
-            "sql": {
-              "columns": [
-                {
-                  "parameters": [],
-                  "type": "function"
-                }
-              ],
-              "groupBy": [
-                {
-                  "property": {
-                    "type": "string"
-                  },
-                  "type": "groupBy"
-                }
-              ],
-              "limit": 50
-            }
-          }
-        ],
-        "title": "Panel Title",
-        "type": "table"
-      },
-      {
-        "datasource": {
-          "type": "grafana-postgresql-datasource",
-          "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "custom": {
-              "align": "auto",
-              "cellOptions": {
-                "type": "auto"
-              },
-              "inspect": false
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unitScale": true
-          },
-          "overrides": [
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "from_entity_name"
-              },
-              "properties": [
-                {
-                  "id": "custom.filterable",
-                  "value": true
-                },
-                {
-                  "id": "links",
-                  "value": [
-                    {
-                      "targetBlank": true,
-                      "title": "Debank",
-                      "url": "https://debank.com/profile/${__data.fields.from_address}"
-                    },
-                    {
-                      "targetBlank": true,
-                      "title": "MetaSleuth",
-                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__data.fields.from_address}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "to_entity_name"
-              },
-              "properties": [
-                {
-                  "id": "custom.filterable",
-                  "value": true
-                },
-                {
-                  "id": "links",
-                  "value": [
-                    {
-                      "targetBlank": true,
-                      "title": "Debank",
-                      "url": "https://debank.com/profile/${__data.fields.to_address}"
-                    },
-                    {
-                      "targetBlank": true,
-                      "title": "MetaSleuth",
-                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__data.fields.to_address}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "token_address"
-              },
-              "properties": [
-                {
-                  "id": "links",
-                  "value": [
-                    {
-                      "targetBlank": true,
-                      "title": "MetaSleuth",
-                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "from_address"
-              },
-              "properties": [
-                {
-                  "id": "links",
-                  "value": [
-                    {
-                      "targetBlank": true,
-                      "title": "Debank",
-                      "url": "https://debank.com/profile/${__value.raw}"
-                    },
-                    {
-                      "targetBlank": true,
-                      "title": "MetaSleuth",
-                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "to_address"
-              },
-              "properties": [
-                {
-                  "id": "links",
-                  "value": [
-                    {
-                      "targetBlank": true,
-                      "title": "Debank",
-                      "url": "https://debank.com/profile/${__value.raw}"
-                    },
-                    {
-                      "targetBlank": true,
-                      "title": "MetaSleuth",
-                      "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "hash"
-              },
-              "properties": [
-                {
-                  "id": "links",
-                  "value": [
-                    {
-                      "targetBlank": true,
-                      "title": "Phalcon",
-                      "url": "https://phalcon.blocksec.com/explorer/tx/${__data.fields.chain}/${__value.raw}"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        "gridPos": {
-          "h": 39,
-          "w": 24,
-          "x": 0,
-          "y": 6
-        },
-        "id": 2,
-        "options": {
-          "cellHeight": "sm",
-          "footer": {
-            "countRows": false,
-            "fields": "",
-            "reducer": [
-              "sum"
-            ],
-            "show": false
-          },
-          "showHeader": true
-        },
-        "pluginVersion": "10.3.1",
-        "targets": [
-          {
-            "datasource": {
-              "type": "grafana-postgresql-datasource",
-              "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
-            },
-            "editorMode": "code",
-            "format": "table",
-            "rawQuery": true,
-            "rawSql": "SELECT hash, from_entity_name,  token_address, to_entity_name, \nCASE \n           WHEN chain = 'avalanche' THEN 'avalanche'\n           WHEN chain = 'base' THEN 'base'\n           WHEN chain = 'arbitrum_one' THEN 'arbitrum'\n           WHEN chain = 'ethereum' THEN 'eth'\n           WHEN chain = 'polygon' THEN 'polygon'\n           ELSE '/'\n       END AS chain,\n       from_address, to_address\nFROM transactions WHERE (from_entity_name in (${Entity:singlequote}) OR to_entity_name in (${Entity:singlequote})) LIMIT 1000 ",
-            "refId": "transactions",
-            "sql": {
-              "columns": [
-                {
-                  "parameters": [
-                    {
-                      "name": "hash",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                },
-                {
-                  "parameters": [
-                    {
-                      "name": "from_address",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                },
-                {
-                  "parameters": [
-                    {
-                      "name": "from_entity_name",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                },
-                {
-                  "parameters": [
-                    {
-                      "name": "to_address",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                },
-                {
-                  "parameters": [
-                    {
-                      "name": "to_entity_name",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                },
-                {
-                  "parameters": [
-                    {
-                      "name": "token_address",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                },
-                {
-                  "parameters": [
-                    {
-                      "name": "chain",
-                      "type": "functionParameter"
-                    }
-                  ],
-                  "type": "function"
-                }
-              ],
-              "groupBy": [
-                {
-                  "property": {
-                    "type": "string"
-                  },
-                  "type": "groupBy"
-                }
-              ],
-              "limit": 50
-            },
-            "table": "transactions"
-          }
-        ],
-        "title": "Panel Title",
-        "transformations": [],
-        "type": "table"
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
       }
-    ],
-    "refresh": "",
-    "schemaVersion": 39,
-    "tags": [],
-    "templating": {
-      "list": [
-        {
-          "allValue": "SELECT name FROM entities",
-          "current": {
-            "selected": true,
-            "text": [
-              "1kx"
-            ],
-            "value": [
-              "1kx"
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false,
+            "minWidth": 50
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
             ]
           },
+          "unitScale": true
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "twitter"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "",
+                    "url": "${__value.raw}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "website"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "",
+                    "url": "${__value.raw}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 11,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.3.1",
+      "targets": [
+        {
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
           },
-          "definition": "SELECT name FROM entities",
-          "hide": 0,
-          "includeAll": true,
-          "label": "Entity",
-          "multi": true,
-          "name": "Entity",
-          "options": [],
-          "query": "SELECT name FROM entities",
-          "refresh": 1,
-          "regex": "",
-          "skipUrlSync": false,
-          "sort": 1,
-          "type": "query"
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT name, website, twitter \nFROM entities \nWHERE name in (${Entity:singlequote})\nORDER BY twitter DESC;",
+          "refId": "entities board",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [
+                  {
+                    "name": "name",
+                    "type": "functionParameter"
+                  }
+                ],
+                "type": "function"
+              },
+              {
+                "parameters": [
+                  {
+                    "name": "website",
+                    "type": "functionParameter"
+                  }
+                ],
+                "type": "function"
+              },
+              {
+                "parameters": [
+                  {
+                    "name": "twitter",
+                    "type": "functionParameter"
+                  }
+                ],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "entities"
         }
-      ]
+      ],
+      "title": "Monitored entities",
+      "transparent": true,
+      "type": "table"
     },
-    "time": {
-      "from": "now-6h",
-      "to": "now"
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "unit": "currencyUSD",
+          "unitScale": true
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "00",
+                  "1inch",
+                  "1sol",
+                  "3crv",
+                  "4token",
+                  "aave",
+                  "abal",
+                  "abt",
+                  "ace",
+                  "ach",
+                  "acre",
+                  "acx",
+                  "adel",
+                  "adf",
+                  "ae",
+                  "aergo",
+                  "agii",
+                  "agld",
+                  "aidoge",
+                  "aioz",
+                  "ajna",
+                  "akita",
+                  "akro",
+                  "alcx",
+                  "ald",
+                  "aleph",
+                  "ali",
+                  "alice",
+                  "alpa",
+                  "alpaca",
+                  "alpha",
+                  "alphr",
+                  "alt",
+                  "amc",
+                  "ampl",
+                  "anc",
+                  "angle",
+                  "ankr",
+                  "ant",
+                  "any",
+                  "aog",
+                  "ape",
+                  "api3",
+                  "apm",
+                  "aqt",
+                  "arb",
+                  "arcona",
+                  "areth",
+                  "arkm",
+                  "arkn",
+                  "ash",
+                  "asm",
+                  "ast",
+                  "asteth",
+                  "atom",
+                  "auction",
+                  "audio",
+                  "aura",
+                  "aurabal",
+                  "ausdc",
+                  "avax",
+                  "avtm",
+                  "awbtc",
+                  "aweth",
+                  "awsteth",
+                  "axl",
+                  "axs",
+                  "baby",
+                  "bacon",
+                  "badger",
+                  "bal",
+                  "band",
+                  "bat",
+                  "bbank",
+                  "bch",
+                  "bcmc",
+                  "beam",
+                  "bel",
+                  "bend",
+                  "berry",
+                  "bgs",
+                  "bico",
+                  "bigtime",
+                  "bit",
+                  "bluesparrow",
+                  "blur",
+                  "bmx",
+                  "bnb",
+                  "bnt",
+                  "boa",
+                  "boba",
+                  "bolly",
+                  "bond",
+                  "bondly",
+                  "bone",
+                  "botto",
+                  "bpt",
+                  "breed",
+                  "brise",
+                  "bscpad",
+                  "bsc-usd",
+                  "btc2.0",
+                  "btcb",
+                  "btcmeme",
+                  "btl",
+                  "btrfly",
+                  "btrst",
+                  "bump",
+                  "burn",
+                  "busd",
+                  "bvc",
+                  "bzr",
+                  "c98",
+                  "caga",
+                  "cake",
+                  "cal",
+                  "catheon",
+                  "cbeth",
+                  "cbk",
+                  "cdai",
+                  "ceek",
+                  "cel",
+                  "cere",
+                  "cgg",
+                  "chain",
+                  "chr",
+                  "chz",
+                  "cls",
+                  "clv",
+                  "cnv",
+                  "co",
+                  "combo",
+                  "comp",
+                  "conv",
+                  "cook",
+                  "cot",
+                  "cow",
+                  "cpool",
+                  "cqt",
+                  "crc",
+                  "cre",
+                  "cro",
+                  "crv",
+                  "ctc",
+                  "ctsi",
+                  "ctx",
+                  "cube",
+                  "cudos",
+                  "culo",
+                  "cvnt",
+                  "cvp",
+                  "cvx",
+                  "cvxcrv",
+                  "cyber",
+                  "cyclub",
+                  "dai",
+                  "dao",
+                  "dar",
+                  "ddd",
+                  "de",
+                  "degen",
+                  "dent",
+                  "deod",
+                  "depay",
+                  "devt",
+                  "df",
+                  "dfx",
+                  "dfyn",
+                  "dg",
+                  "dht",
+                  "dhv",
+                  "dip",
+                  "dis",
+                  "diver",
+                  "dodo",
+                  "dog",
+                  "doge",
+                  "dons",
+                  "donut",
+                  "dora",
+                  "dose",
+                  "dpay",
+                  "dpi",
+                  "dpx",
+                  "dpy",
+                  "dragon",
+                  "dsrun",
+                  "duck",
+                  "duckies",
+                  "dusk",
+                  "dust",
+                  "dx",
+                  "dyp",
+                  "eden",
+                  "efi",
+                  "egc",
+                  "elec",
+                  "elon",
+                  "emon",
+                  "enj",
+                  "ens",
+                  "eosdac",
+                  "epik",
+                  "eqz",
+                  "ern",
+                  "ertha",
+                  "ess",
+                  "ethdydx",
+                  "ethv",
+                  "eul",
+                  "eurs",
+                  "eva",
+                  "exrd",
+                  "extra",
+                  "ez",
+                  "farm",
+                  "fbx",
+                  "fdusd",
+                  "fei",
+                  "fet",
+                  "fiwa",
+                  "floki",
+                  "flr",
+                  "flx",
+                  "forex",
+                  "fort",
+                  "forth",
+                  "fox",
+                  "foxe",
+                  "frax",
+                  "free",
+                  "front",
+                  "frxeth",
+                  "ftt",
+                  "fuse",
+                  "fwb",
+                  "fxs",
+                  "gal",
+                  "gala",
+                  "gamma",
+                  "gas",
+                  "gcoin",
+                  "gdo",
+                  "gdoge",
+                  "gdt",
+                  "gec",
+                  "gfly",
+                  "gft",
+                  "ggg",
+                  "gmee",
+                  "gmt",
+                  "gmx",
+                  "gno",
+                  "gns",
+                  "goal",
+                  "gods",
+                  "gof",
+                  "gog",
+                  "gov",
+                  "gq",
+                  "grg",
+                  "grt",
+                  "gs",
+                  "gse",
+                  "gst-bsc",
+                  "gusd",
+                  "gyen",
+                  "hair",
+                  "haka",
+                  "hbot",
+                  "hec",
+                  "hegic",
+                  "hex",
+                  "hft",
+                  "hi",
+                  "hid",
+                  "high",
+                  "hmt",
+                  "hook",
+                  "hopr",
+                  "hotcross",
+                  "hpt",
+                  "hsf",
+                  "ht",
+                  "hunt",
+                  "husd",
+                  "hxro",
+                  "ice",
+                  "iclick",
+                  "id",
+                  "idex",
+                  "idia",
+                  "idv",
+                  "ifarm",
+                  "igu",
+                  "ilv",
+                  "imx",
+                  "index",
+                  "ing",
+                  "inj",
+                  "ins",
+                  "inst",
+                  "insur",
+                  "inu",
+                  "ioi",
+                  "iotx",
+                  "isky",
+                  "itgr",
+                  "ixs",
+                  "jam",
+                  "jasmy",
+                  "jesus",
+                  "jgn",
+                  "joe",
+                  "k21",
+                  "kap",
+                  "kbox",
+                  "kct",
+                  "keep",
+                  "key",
+                  "kibshi",
+                  "kine",
+                  "kingdom",
+                  "knc",
+                  "kncl",
+                  "knot",
+                  "kono",
+                  "kp3r",
+                  "kt",
+                  "kyoko",
+                  "labsv2",
+                  "ladys",
+                  "lbl",
+                  "lcx",
+                  "lever",
+                  "lime",
+                  "lina",
+                  "link",
+                  "lit",
+                  "lith",
+                  "lm",
+                  "lmcswap",
+                  "lmr",
+                  "lmwr",
+                  "lon",
+                  "looks",
+                  "loot",
+                  "lords",
+                  "lpt",
+                  "lqty",
+                  "lrc",
+                  "lunc",
+                  "lyra",
+                  "magic",
+                  "map",
+                  "mars4",
+                  "marsh",
+                  "mask",
+                  "math",
+                  "matic",
+                  "mav",
+                  "mc",
+                  "mcb",
+                  "mchc",
+                  "mco2",
+                  "mdao",
+                  "mds",
+                  "mdt",
+                  "mem",
+                  "meme",
+                  "merc",
+                  "mesh",
+                  "meta",
+                  "mir",
+                  "mix",
+                  "mkr",
+                  "mm",
+                  "mnt",
+                  "mono",
+                  "mooned",
+                  "mpl",
+                  "msheesha",
+                  "mt",
+                  "mta",
+                  "mtl",
+                  "mts",
+                  "mtv",
+                  "multi",
+                  "muse",
+                  "mv",
+                  "mvl",
+                  "mx",
+                  "mxc",
+                  "myth",
+                  "naos",
+                  "ndx",
+                  "nems",
+                  "neu",
+                  "nexo",
+                  "next",
+                  "nkn",
+                  "nmr",
+                  "nmt",
+                  "note",
+                  "nova",
+                  "npm",
+                  "nrfb",
+                  "nu",
+                  "nxm",
+                  "o3",
+                  "ocean",
+                  "oggy",
+                  "ogn",
+                  "ole",
+                  "ooe",
+                  "ooki",
+                  "ooks",
+                  "op",
+                  "opul",
+                  "orbs",
+                  "orion",
+                  "ox",
+                  "oxt",
+                  "oxy",
+                  "papa",
+                  "para",
+                  "paxg",
+                  "pay",
+                  "pendle",
+                  "people",
+                  "pepe",
+                  "pepecoin",
+                  "perc",
+                  "perl",
+                  "perp",
+                  "pet",
+                  "pickle",
+                  "pla",
+                  "planet",
+                  "plt",
+                  "ply",
+                  "pol",
+                  "pols",
+                  "polx",
+                  "pond",
+                  "pool",
+                  "pop",
+                  "prime",
+                  "prisma",
+                  "prom",
+                  "psp",
+                  "pst",
+                  "pstake",
+                  "ptf",
+                  "ptu",
+                  "pumlx",
+                  "push",
+                  "pyr",
+                  "pyusd",
+                  "pzp",
+                  "qi",
+                  "qnt",
+                  "qrdo",
+                  "quartz",
+                  "quick",
+                  "quidd",
+                  "qwan",
+                  "raca",
+                  "rad",
+                  "radar",
+                  "rai",
+                  "rari",
+                  "razor",
+                  "rbn",
+                  "rbx",
+                  "rdnt",
+                  "reef",
+                  "ren",
+                  "renbtc",
+                  "req",
+                  "reth",
+                  "revv",
+                  "rfd",
+                  "rgt",
+                  "rlc",
+                  "rly",
+                  "rndr",
+                  "rocki",
+                  "roco",
+                  "room",
+                  "rosx",
+                  "route",
+                  "rpl",
+                  "rsr",
+                  "rss3",
+                  "sai",
+                  "saito",
+                  "sald",
+                  "sand",
+                  "scm",
+                  "sd",
+                  "sdt",
+                  "seth",
+                  "sfi",
+                  "sfp",
+                  "sfrxeth",
+                  "sfty",
+                  "sheesha",
+                  "shib",
+                  "shido",
+                  "shit",
+                  "shrap",
+                  "silo",
+                  "silv2",
+                  "simp",
+                  "sin",
+                  "sis",
+                  "size",
+                  "skl",
+                  "skrt",
+                  "skt",
+                  "slp",
+                  "smcw",
+                  "smol",
+                  "smty",
+                  "snk",
+                  "snt",
+                  "snx",
+                  "socks",
+                  "sol",
+                  "sos",
+                  "soul",
+                  "souls",
+                  "spa",
+                  "spay",
+                  "spell",
+                  "spork",
+                  "spx",
+                  "srm",
+                  "ssp",
+                  "ssv",
+                  "steth",
+                  "stg",
+                  "storj",
+                  "stpt",
+                  "strp",
+                  "sudo",
+                  "suku",
+                  "susd",
+                  "sushi",
+                  "swap",
+                  "sweth",
+                  "switch",
+                  "swpr",
+                  "swych",
+                  "sxp",
+                  "sxs",
+                  "syn",
+                  "synr",
+                  "t",
+                  "tbill",
+                  "tel",
+                  "thales",
+                  "time",
+                  "tita",
+                  "tlm",
+                  "toke",
+                  "token",
+                  "toko",
+                  "tomi",
+                  "trac",
+                  "trace",
+                  "trade",
+                  "tribe",
+                  "trx",
+                  "try",
+                  "tsuka",
+                  "tsx",
+                  "tune",
+                  "tusd",
+                  "type",
+                  "ubi",
+                  "ufarm",
+                  "uft",
+                  "ugt",
+                  "uma",
+                  "umami",
+                  "umb",
+                  "unb",
+                  "uni",
+                  "uno",
+                  "usdc",
+                  "usdc.e",
+                  "usdcet",
+                  "usde",
+                  "usdm",
+                  "usdp",
+                  "usdt",
+                  "usdtet",
+                  "ust",
+                  "ustc",
+                  "ut",
+                  "vbit",
+                  "vee",
+                  "vega",
+                  "velo",
+                  "vera",
+                  "veth",
+                  "vext",
+                  "vgx",
+                  "vidy",
+                  "vita",
+                  "vra",
+                  "vrtx",
+                  "vsp",
+                  "w3g",
+                  "wagmi",
+                  "wampl",
+                  "watch",
+                  "water",
+                  "wavax",
+                  "wbnb",
+                  "wbtc",
+                  "wcfg",
+                  "web",
+                  "wegld",
+                  "weth",
+                  "wflr",
+                  "wftm",
+                  "whale",
+                  "wjxn",
+                  "wkc",
+                  "wld",
+                  "wmatic",
+                  "wncg",
+                  "wndr",
+                  "wnxm",
+                  "wnyc",
+                  "woo",
+                  "woptidoge",
+                  "wow",
+                  "wpokt",
+                  "wsteth",
+                  "xaut",
+                  "xcad",
+                  "xcn",
+                  "xdata",
+                  "xi",
+                  "xms",
+                  "xmx",
+                  "xor",
+                  "xpay",
+                  "xrise",
+                  "xrp",
+                  "xsushi",
+                  "xts",
+                  "xvs",
+                  "xwg",
+                  "xy",
+                  "xyo",
+                  "yes",
+                  "yesp",
+                  "yfi",
+                  "yfii",
+                  "yfx",
+                  "ygg",
+                  "yin",
+                  "yld",
+                  "yup",
+                  "zcn",
+                  "zee",
+                  "zeniq",
+                  "zeta",
+                  "zeum",
+                  "zkp",
+                  "zrx",
+                  "zum",
+                  "шайлушай",
+                  "btc",
+                  "eth",
+                  "ldo"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 13,
+        "x": 11,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent",
+            "value"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "/.*/",
+          "limit": 10,
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT UPPER(token_symbol),\n    SUM(balance_in_dollars::FLOAT) AS total_balance\nFROM \n    portfolio_holdings\nWHERE \n    (entity_name IN (${Entity:singlequote})) \n    AND \n    timestamp::numeric = (SELECT MAX(timestamp::numeric) FROM portfolio_holdings where (entity_name IN (${Entity:singlequote})))\nGROUP BY token_symbol;\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Portfolio holdings",
+      "transformations": [
+        {
+          "id": "rowsToFields",
+          "options": {}
+        }
+      ],
+      "type": "piechart"
     },
-    "timepicker": {},
-    "timezone": "",
-    "title": "Asylum dashboard",
-    "uid": "bfcb67d2-b5c8-4f1e-b9ba-25eb66b9fbcf",
-    "version": 16,
-    "weekStart": ""
-  }
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unitScale": true
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "address"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Debank",
+                    "url": "https://debank.com/profile/${__value.raw}"
+                  },
+                  {
+                    "targetBlank": true,
+                    "title": "MetaSleuth",
+                    "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 229
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "name"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "",
+                    "url": "https://debank.com/profile/${__data.fields.unique_addresses}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 3
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "10.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select name, address, CASE \n           WHEN chain = 'avalanche' THEN 'avalanche'\n           WHEN chain = 'base' THEN 'base'\n           WHEN chain = 'arbitrum_one' THEN 'arbitrum'\n           WHEN chain = 'ethereum' THEN 'eth'\n           WHEN chain = 'polygon' THEN 'polygon'\n           ELSE chain\n       END AS chain\n FROM unique_addresses WHERE name IN ( ${Entity:singlequote} );\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Unique addresses",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD",
+          "unitScale": true
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 8,
+        "y": 3
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "10.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n    balance_in_dollars::float AS total_balance\nFROM \n    portfolio_holdings\nWHERE \n    (entity_name IN (${Entity:singlequote})) \n    AND \n    timestamp::numeric = (SELECT MAX(timestamp::numeric) FROM portfolio_holdings where (entity_name IN (${Entity:singlequote})));\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Total balance value",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unitScale": true
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 8,
+        "y": 7
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "10.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select count(*) from unique_addresses where name in (${Entity:singlequote});",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Unique addresses",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unitScale": true
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "from_entity_name"
+            },
+            "properties": [
+              {
+                "id": "custom.filterable",
+                "value": true
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Debank",
+                    "url": "https://debank.com/profile/${__data.fields.from_address}"
+                  },
+                  {
+                    "targetBlank": true,
+                    "title": "MetaSleuth",
+                    "url": "https://metasleuth.io/result/${__data.fields.chain}/${__data.fields.from_address}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 94
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "to_entity_name"
+            },
+            "properties": [
+              {
+                "id": "custom.filterable",
+                "value": true
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Debank",
+                    "url": "https://debank.com/profile/${__data.fields.to_address}"
+                  },
+                  {
+                    "targetBlank": true,
+                    "title": "MetaSleuth",
+                    "url": "https://metasleuth.io/result/${__data.fields.chain}/${__data.fields.to_address}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "token_address"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "MetaSleuth",
+                    "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "from_address"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Debank",
+                    "url": "https://debank.com/profile/${__value.raw}"
+                  },
+                  {
+                    "targetBlank": true,
+                    "title": "MetaSleuth",
+                    "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "to_address"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Debank",
+                    "url": "https://debank.com/profile/${__value.raw}"
+                  },
+                  {
+                    "targetBlank": true,
+                    "title": "MetaSleuth",
+                    "url": "https://metasleuth.io/result/${__data.fields.chain}/${__value.raw}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "hash"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Phalcon",
+                    "url": "https://phalcon.blocksec.com/explorer/tx/${__data.fields.chain}/${__value.raw}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "amount"
+            },
+            "properties": [
+              {
+                "id": "links"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "transfer_value"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 276
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "block_timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 239
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 39,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "from_entity_name"
+          }
+        ]
+      },
+      "pluginVersion": "10.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT block_timestamp, hash, from_entity_name, CONCAT(ROUND(amount::numeric, 2), ' ', token_symbol, ' ($', ROUND(dollar_amount::numeric, 2), ')') AS transfer_value, to_entity_name, \nCASE \n           WHEN chain = 'avalanche' THEN 'avalanche'\n           WHEN chain = 'base' THEN 'base'\n           WHEN chain = 'arbitrum_one' THEN 'arbitrum'\n           WHEN chain = 'ethereum' THEN 'eth'\n           WHEN chain = 'polygon' THEN 'polygon'\n           ELSE chain\n       END AS chain,\n       token_address, from_address, to_address, amount, token_symbol, dollar_amount\nFROM transactions WHERE (from_entity_name in (${Entity:singlequote}) OR to_entity_name in (${Entity:singlequote})) AND (from_address in (${Addresses:singlequote}) OR to_address in (${Addresses:singlequote})) AND  (dollar_amount::numeric >= $moneytransferred) AND (token_symbol in (${name_tok:singlequote}))  ORDER BY block_timestamp DESC LIMIT 1000 ",
+          "refId": "transactions",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [
+                  {
+                    "name": "hash",
+                    "type": "functionParameter"
+                  }
+                ],
+                "type": "function"
+              },
+              {
+                "parameters": [
+                  {
+                    "name": "from_address",
+                    "type": "functionParameter"
+                  }
+                ],
+                "type": "function"
+              },
+              {
+                "parameters": [
+                  {
+                    "name": "from_entity_name",
+                    "type": "functionParameter"
+                  }
+                ],
+                "type": "function"
+              },
+              {
+                "parameters": [
+                  {
+                    "name": "to_address",
+                    "type": "functionParameter"
+                  }
+                ],
+                "type": "function"
+              },
+              {
+                "parameters": [
+                  {
+                    "name": "to_entity_name",
+                    "type": "functionParameter"
+                  }
+                ],
+                "type": "function"
+              },
+              {
+                "parameters": [
+                  {
+                    "name": "token_address",
+                    "type": "functionParameter"
+                  }
+                ],
+                "type": "function"
+              },
+              {
+                "parameters": [
+                  {
+                    "name": "chain",
+                    "type": "functionParameter"
+                  }
+                ],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "transactions"
+        }
+      ],
+      "title": "Recent transactions",
+      "transformations": [],
+      "type": "table"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": "SELECT name FROM entities",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+        },
+        "definition": "SELECT name FROM entities",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Entity",
+        "multi": true,
+        "name": "Entity",
+        "options": [],
+        "query": "SELECT name FROM entities",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "b3a4cd4e-24c0-4c9f-a09b-195fbea12403"
+        },
+        "definition": "select address from unique_addresses where name in IN ( ${Entity:singlequote} );",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Addresses",
+        "multi": true,
+        "name": "Addresses",
+        "options": [],
+        "query": "select address from unique_addresses where name in IN ( ${Entity:singlequote} );",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": "0",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "$ Transferred >",
+        "multi": false,
+        "name": "moneytransferred",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "0",
+            "value": "0"
+          },
+          {
+            "selected": false,
+            "text": "1000",
+            "value": "1000"
+          },
+          {
+            "selected": false,
+            "text": "10000",
+            "value": "10000"
+          },
+          {
+            "selected": false,
+            "text": "100000",
+            "value": "100000"
+          },
+          {
+            "selected": false,
+            "text": "1000000",
+            "value": "1000000"
+          }
+        ],
+        "query": "0, 1000, 10000, 100000, 1000000",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": "SELECT DISTINCT token_name from transactions",
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "definition": "SELECT DISTINCT token_symbol from transactions;",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Token",
+        "multi": true,
+        "name": "name_tok",
+        "options": [],
+        "query": "SELECT DISTINCT token_symbol from transactions;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Asylum dashboard",
+  "uid": "bfcb67d2-b5c8-4f1e-b9ba-25eb66b9fbcf",
+  "version": 36,
+  "weekStart": ""
+}

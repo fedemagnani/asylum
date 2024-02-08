@@ -20,10 +20,10 @@ pub enum AsylumError {
 }
 #[derive(Clone, Debug)]
 pub enum AsylumMessage{
-    Entities(Vec<arkham::ArkhamEntity>),
+    Entities(Vec<arkham::ArkhamEntity>, i64),
     Transactions(Vec<arkham::ArkhamTransaction>),
     TerminateThread,
-    PortfolioHoldings(Vec<arkham::ArkhamTokenHolding>),
+    PortfolioHoldings(Vec<arkham::ArkhamTokenHolding>, i64),
     // QueryInstruction()
 }
 
