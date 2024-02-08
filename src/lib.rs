@@ -294,9 +294,8 @@ impl Asylum {
     pub fn create_table_thread(&self) -> tokio::task::JoinHandle<()> {
         debug!("Creating tables");
         let postgres_client = self.postgres_client.clone();
-        
+
         let table_thread = tokio::spawn(async move {
-            
             let mut postgres_client = postgres_client.lock().await; //Safe lock system: postgres_client is locked initially to create all the tables (we wait until they are created), then it is locked in postgres_thread inifiedly to update the tables (no other thread needs to access it, so it is safe to lock it in this way)
             Asylum::create_table_entities(&mut postgres_client)
                 .await
@@ -310,7 +309,6 @@ impl Asylum {
             Asylum::create_table_portfolio_holdings(&mut postgres_client)
                 .await
                 .expect("Error creating table portfolio holdings");
-            
         });
         return table_thread;
     }
@@ -318,7 +316,7 @@ impl Asylum {
         let sender = self.broadcast_sender.clone();
         let mut receiver = self.broadcast_sender.subscribe();
         // let mpmc_sender = self.mpmc_sender.clone();
-        
+
         let config = self.config.clone();
         // let config = config.lock().await;
         let execution_config = &config["execution_config"];
@@ -354,7 +352,6 @@ impl Asylum {
 
         let arkham_client = self.arkham_client.clone();
         let transactions_manager_thread = tokio::spawn(async move {
-            
             let mut entities_chunks: Vec<Vec<ArkhamEntity>> = Vec::new();
             loop {
                 if let Ok(am) = receiver.try_recv() {
@@ -394,19 +391,18 @@ impl Asylum {
                     tokio::time::sleep(Duration::from_secs(transaction_delay as u64)).await;
                 } // Use a reference here
             }
-            // 
+            //
         });
         return transactions_manager_thread;
     }
-    pub fn entities_thread(&self) -> tokio::task::JoinHandle<()> {
+    pub fn entities_and_portfolio_thread(&self) -> tokio::task::JoinHandle<()> {
         // let sender_a = self.mpmc_sender.clone();
         let sender_a = self.broadcast_sender.clone();
         let config = self.config.clone();
         let arkham = self.arkham_client.clone();
-        
-        let arkham_entities_thread = tokio::spawn(async move {
-            
-            let mut past_entities = None;
+
+        let arkham_entities_and_portfolio_thread = tokio::spawn(async move {
+            // let mut past_entities = None;
             // let c = config.lock().await;
             let delays = config
                 .get("delay")
@@ -418,87 +414,66 @@ impl Asylum {
                 .as_i64()
                 .expect("Entities delay must be an integer");
             let entities_delay = entities_delay as u64;
-            loop {
-                let entities = arkham.retrieve_enitites(50).await;
-                let timestamp_millis = chrono::Utc::now().timestamp_millis();
-                match entities {
-                    Ok(entities) => {
-                        if let Some(past_entities) = &past_entities {
-                            if entities == *past_entities {
-                                // warn!("Entities are the same as before");
-                                continue;
-                            }
-                        }
-                        past_entities = Some(entities.clone());
-                        sender_a
-                            .send(common::AsylumMessage::Entities(entities, timestamp_millis))
-                            .expect("Error sending thread message with entities");
-                    }
-                    Err(e) => error!("Error: {:?}", e),
-                }
-                tokio::time::sleep(Duration::from_secs(entities_delay)).await;
-            }
-            
-        });
-        return arkham_entities_thread;
-    }
-
-    pub fn portfolio_holdings_thread(&self) -> tokio::task::JoinHandle<()> {
-        let sender = self.broadcast_sender.clone();
-        let mut receiver = self.broadcast_sender.subscribe();
-        let arkham = self.arkham_client.clone();
-        
-        let config = self.config.clone();
-        let portfolio_holdings_thread = tokio::spawn(async move {
-            
-            let delays = config
-                .get("delay")
-                .expect("Delays must be set in your config file");
             let portfolio_holdings_delay = delays
                 .get("portfolio_holdings_delay")
                 .expect("Portfolio holdings delay must be set in your config file");
             let portfolio_holdings_delay = portfolio_holdings_delay
                 .as_i64()
                 .expect("Portfolio holdings delay must be an integer");
-            let portfolio_holdings_delay = portfolio_holdings_delay as u64;
             loop {
-                if let Ok(holdings) = receiver.try_recv() {
-                    match holdings {
-                        common::AsylumMessage::Entities(entities, timestamp_millis) => {
-                            let len = entities.len();
-                            let entities: Vec<ArkhamEntity> = entities.iter().cloned().collect(); // Clone each entity
-
-                            for entity in entities {
-                                let holdings = arkham.retrieve_portfolio(&entity).await;
-                                match holdings {
-                                    Ok(holdings) => {
-                                        sender
-                                            .send(common::AsylumMessage::PortfolioHoldings(holdings, timestamp_millis))
-                                            .expect("Error sending thread message with portfolio holdings");
-                                    }
-                                    Err(e) => {
-                                        error!("Error in fetching portfolio holdings: {:?}", e)
-                                    }
+                let entities = arkham.retrieve_enitites(50).await;
+                let timestamp_millis = chrono::Utc::now().timestamp_millis();
+                match entities {
+                    Ok(entities) => {
+                        // if let Some(past_entities) = &past_entities {
+                        //     if entities == *past_entities {
+                        //         // warn!("Entities are the same as before");
+                        //         continue;
+                        //     }
+                        // }
+                        // past_entities = Some(entities.clone());
+                        sender_a
+                            .clone()
+                            .send(common::AsylumMessage::Entities(
+                                entities.clone(),
+                                timestamp_millis,
+                            ))
+                            .expect("Error sending thread message with entities");
+                        let len = entities.len();
+                        let entities: Vec<ArkhamEntity> = entities.iter().cloned().collect(); // Clone each entity
+                        let timestamp_millis = chrono::Utc::now().timestamp_millis();
+                        for entity in entities {
+                            let holdings = arkham.retrieve_portfolio(&entity).await;
+                            match holdings {
+                                Ok(holdings) => {
+                                    sender_a
+                                        .send(common::AsylumMessage::PortfolioHoldings(
+                                            holdings,
+                                            timestamp_millis,
+                                        ))
+                                        .expect("Error sending thread message with portfolio holdings");
                                 }
-                                tokio::time::sleep(Duration::from_secs(portfolio_holdings_delay))
-                                    .await;
+                                Err(e) => {
+                                    error!("Error in fetching portfolio holdings: {:?}", e)
+                                }
                             }
-                            info!("Updated portfolio holdings for {:?} entities", len);
+                            tokio::time::sleep(Duration::from_secs(portfolio_holdings_delay as u64)).await;
                         }
-                        _ => (),
+                        info!("Updated portfolio holdings for {:?} entities", len);
                     }
+                    Err(e) => error!("Error: {:?}", e),
                 }
+                tokio::time::sleep(Duration::from_secs(entities_delay)).await;
             }
-            
         });
-        return portfolio_holdings_thread;
+        return arkham_entities_and_portfolio_thread;
     }
 
     pub fn postgres_thread(&self) -> tokio::task::JoinHandle<()> {
         // let receiver = self.mpmc_receiver.clone();
         let mut receiver = self.broadcast_sender.subscribe();
         let postgres_client = self.postgres_client.clone();
-        
+
         let config = self.config.clone();
         let execution_config = &config["execution_config"];
         let drop_seconds_transactions = execution_config
@@ -512,7 +487,6 @@ impl Asylum {
             .as_i64()
             .expect("Drop seconds portfolio must be an integer");
         let postgres_thread = tokio::spawn(async move {
-            
             let mut postgres_client = postgres_client.lock().await;
 
             //maybe a bottleneck here -> this resource will keep postgres_client busy (locked) and so it will not be able to be used by other threads, so we need to remove old datas from here. We avoid to create a dedicated thread to not increase the queue in the broadcast channel, so we remove old data when we update entities (which we are going to update more frequently)
@@ -532,11 +506,11 @@ impl Asylum {
                                 drop_seconds_transactions,
                                 drop_seconds_portfolio,
                             )
-                            .await {
+                            .await
+                            {
                                 Ok(_) => info!("Old data deleted"),
                                 Err(e) => error!("Error deleting old data: {:?}", e),
                             }
-
                         }
                         common::AsylumMessage::Transactions(transactions) => {
                             debug!("{:?}", transactions.len());
@@ -567,7 +541,7 @@ impl Asylum {
                             match Asylum::update_table_portfolio_holdings(
                                 &mut postgres_client,
                                 holdings,
-                                timestamp_millis
+                                timestamp_millis,
                             )
                             .await
                             {
@@ -579,7 +553,7 @@ impl Asylum {
                     }
                 }
             }
-            // 
+            //
         });
         return postgres_thread;
     }
@@ -610,15 +584,15 @@ impl Asylum {
         let create_table_thread = self.create_table_thread();
         let transactions_manager_thread = self.transactions_manager_thread();
         let postgres_thread = self.postgres_thread();
-        let arkham_entities_thread = self.entities_thread();
-        let portfolio_holdings_thread = self.portfolio_holdings_thread();
+        let arkham_entities_and_portfolio_thread = self.entities_and_portfolio_thread();
+        // let portfolio_holdings_thread = self.portfolio_holdings_thread();
         let _ = tokio::join!(
             // web_server_thread,
             create_table_thread,
             transactions_manager_thread,
             postgres_thread,
-            arkham_entities_thread,
-            portfolio_holdings_thread
+            arkham_entities_and_portfolio_thread,
+            // portfolio_holdings_thread
         );
     }
 }
