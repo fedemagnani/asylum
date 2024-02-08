@@ -8,7 +8,7 @@ async fn main() {
     let capacity = 100;
     let config_path = "Config.toml";
     let secret_path = "Secrets.toml";
-    let log_level = "error";
+    let log_level = "info";
     common::init_logger(Some(log_level));
     Asylum::print_asylum();
     let asylum = Asylum::new(

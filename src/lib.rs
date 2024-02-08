@@ -462,11 +462,10 @@ impl Asylum {
                 .expect("Portfolio holdings delay must be an integer");
             let portfolio_holdings_delay = portfolio_holdings_delay as u64;
             loop {
-                let mut len = 0;
                 if let Ok(holdings) = receiver.try_recv() {
                     match holdings {
                         common::AsylumMessage::Entities(entities, timestamp_millis) => {
-                            len = entities.len();
+                            let len = entities.len();
                             let entities: Vec<ArkhamEntity> = entities.iter().cloned().collect(); // Clone each entity
 
                             for entity in entities {
@@ -484,10 +483,10 @@ impl Asylum {
                                 tokio::time::sleep(Duration::from_secs(portfolio_holdings_delay))
                                     .await;
                             }
+                            info!("Updated portfolio holdings for {:?} entities", len);
                         }
                         _ => (),
                     }
-                    info!("Updated portfolio holdings for {:?} entities", len);
                 }
             }
             

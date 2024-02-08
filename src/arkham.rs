@@ -407,11 +407,15 @@ impl MyArkham {
         let entity_name = entity.name.clone().unwrap();
         let timestamp_millis = chrono::Utc::now().timestamp_millis();
         let url = format!("{}/portfolio/entity/{}?time={}", BASE_URL, entity_id, timestamp_millis);
-        let resp = self.client.get(&url).send().await.unwrap();
-        let body = resp.text().await.unwrap();
-        let portfolio: serde_json::Value = serde_json::from_str(&body).unwrap();
+        let resp = self.client.get(&url).send().await.map_err(|e| AsylumError::ReqwestError(e))?;
+        let body = resp.text().await.map_err(|e| AsylumError::ReqwestError(e))?;
+        let portfolio: serde_json::Value = serde_json::from_str(&body).map_err(|e| AsylumError::SerdeError(e))?;
         // We get the keys of the portfolio
-        let chains = portfolio.as_object().unwrap().keys().collect::<Vec<&String>>();
+        let chains = portfolio.as_object();
+        if chains.is_none(){
+            return Err(AsylumError::ArkhamError("Can't find chains in portfolio".to_owned()));
+        }
+        let chains = chains.unwrap().keys().collect::<Vec<&String>>();
         let mut holdings = Vec::<ArkhamTokenHolding>::new();
         for chain in chains{
             let chain = chain.to_string();
