@@ -296,7 +296,7 @@ impl Asylum {
         
         let table_thread = tokio::spawn(async move {
             
-            let mut postgres_client = postgres_client.lock().await;
+            let mut postgres_client = postgres_client.lock().await; //Safe lock system: postgres_client is locked initially to create all the tables (we wait until they are created), then it is locked in postgres_thread inifiedly to update the tables (no other thread needs to access it, so it is safe to lock it in this way)
             Asylum::create_table_entities(&mut postgres_client)
                 .await
                 .expect("Error creating table entities");
