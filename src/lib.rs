@@ -588,7 +588,7 @@ impl Asylum {
         // let portfolio_holdings_thread = self.portfolio_holdings_thread();
         let _ = tokio::join!(
             // web_server_thread,
-            // create_table_thread,
+            create_table_thread,
             transactions_manager_thread,
             postgres_thread,
             arkham_entities_and_portfolio_thread,
