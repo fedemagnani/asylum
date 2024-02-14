@@ -596,7 +596,7 @@ impl Asylum {
         );
     }
 }
-#[tokio::test(flavor = "multi_thread", worker_threads = 10)]
+#[tokio::test(flavor = "multi_thread", worker_threads = 5)]
 async fn test_asylum() {
     info!("Starting test");
     // TODO:
