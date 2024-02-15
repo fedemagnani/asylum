@@ -581,16 +581,16 @@ impl Asylum {
     pub async fn start(&self) {
         // // At the strtup, we connect the client, create tables if they don't exist
         // let web_server_thread = self.web_server_thread();
-        // let create_table_thread = self.create_table_thread();
-        // let transactions_manager_thread = self.transactions_manager_thread();
-        // let postgres_thread = self.postgres_thread();
+        let create_table_thread = self.create_table_thread();
+        let transactions_manager_thread = self.transactions_manager_thread();
+        let postgres_thread = self.postgres_thread();
         let arkham_entities_and_portfolio_thread = self.entities_and_portfolio_thread();
         // let portfolio_holdings_thread = self.portfolio_holdings_thread();
         let _ = tokio::join!(
             // web_server_thread,
-            // create_table_thread,
-            // transactions_manager_thread,
-            // postgres_thread,
+            create_table_thread,
+            transactions_manager_thread,
+            postgres_thread,
             arkham_entities_and_portfolio_thread,
             // portfolio_holdings_thread
         );
