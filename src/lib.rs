@@ -6,6 +6,8 @@ use serde_json::error;
 use std::{sync::Arc, time::Duration};
 use tokio::sync::broadcast;
 use tokio_postgres::types::ToSql;
+
+use crate::postgres::MyPostgreSQL;
 pub mod arkham;
 pub mod common;
 pub mod postgres;
@@ -451,13 +453,18 @@ impl Asylum {
                                             holdings,
                                             timestamp_millis,
                                         ))
-                                        .expect("Error sending thread message with portfolio holdings");
+                                        .expect(
+                                            "Error sending thread message with portfolio holdings",
+                                        );
                                 }
                                 Err(e) => {
                                     error!("Error in fetching portfolio holdings: {:?}", e)
                                 }
                             }
-                            tokio::time::sleep(Duration::from_secs(portfolio_holdings_delay as u64)).await;
+                            tokio::time::sleep(Duration::from_secs(
+                                portfolio_holdings_delay as u64,
+                            ))
+                            .await;
                         }
                         info!("Updated portfolio holdings for {:?} entities", len);
                     }
@@ -472,7 +479,7 @@ impl Asylum {
     pub fn postgres_thread(&self) -> tokio::task::JoinHandle<()> {
         // let receiver = self.mpmc_receiver.clone();
         let mut receiver = self.broadcast_sender.subscribe();
-        let postgres_client = self.postgres_client.clone();
+        // let postgres_client = self.postgres_client.clone();
 
         let config = self.config.clone();
         let execution_config = &config["execution_config"];
@@ -486,71 +493,66 @@ impl Asylum {
             .expect("Drop seconds portfolio must be set in your config file")
             .as_i64()
             .expect("Drop seconds portfolio must be an integer");
+        let config_path = self.config_path.clone();
+        let secret_path = self.secret_path.clone();
         let postgres_thread = tokio::spawn(async move {
-            let mut postgres_client = postgres_client.lock().await;
+            // let mut postgres_client = postgres_client.lock().await;
+            let mut postgres_client = MyPostgreSQL::new(secret_path.as_deref(), config_path.as_deref())
+                .await;
 
             //maybe a bottleneck here -> this resource will keep postgres_client busy (locked) and so it will not be able to be used by other threads, so we need to remove old datas from here. We avoid to create a dedicated thread to not increase the queue in the broadcast channel, so we remove old data when we update entities (which we are going to update more frequently)
-            loop {
-                if let Ok(am) = receiver.recv().await {
-                    match am {
-                        common::AsylumMessage::Entities(entities, _) => {
-                            debug!("{:?}", entities.len());
-                            match Asylum::update_table_entities(&mut postgres_client, entities)
-                                .await
-                            {
-                                Ok(_) => info!("Entities updated"),
-                                Err(e) => error!("Error updating entities: {:?}", e),
-                            }
-                            match Asylum::delete_old_data(
-                                &mut postgres_client,
-                                drop_seconds_transactions,
-                                drop_seconds_portfolio,
-                            )
-                            .await
-                            {
-                                Ok(_) => info!("Old data deleted"),
-                                Err(e) => error!("Error deleting old data: {:?}", e),
-                            }
+            while let Ok(am) = receiver.recv().await {
+                match am {
+                    common::AsylumMessage::Entities(entities, _) => {
+                        debug!("{:?}", entities.len());
+                        match Asylum::update_table_entities(&mut postgres_client, entities).await {
+                            Ok(_) => info!("Entities updated"),
+                            Err(e) => error!("Error updating entities: {:?}", e),
                         }
-                        common::AsylumMessage::Transactions(transactions) => {
-                            debug!("{:?}", transactions.len());
-                            match Asylum::update_table_transactions(
-                                &mut postgres_client,
-                                transactions,
-                            )
+                        match Asylum::delete_old_data(
+                            &mut postgres_client,
+                            drop_seconds_transactions,
+                            drop_seconds_portfolio,
+                        )
+                        .await
+                        {
+                            Ok(_) => info!("Old data deleted"),
+                            Err(e) => error!("Error deleting old data: {:?}", e),
+                        }
+                    }
+                    common::AsylumMessage::Transactions(transactions) => {
+                        debug!("{:?}", transactions.len());
+                        match Asylum::update_table_transactions(&mut postgres_client, transactions)
                             .await
-                            {
-                                Ok(_) => {
-                                    info!("Transactions updated");
-                                    match Asylum::update_table_unique_addresses(
-                                        &mut postgres_client,
-                                    )
+                        {
+                            Ok(_) => {
+                                info!("Transactions updated");
+                                match Asylum::update_table_unique_addresses(&mut postgres_client)
                                     .await
-                                    {
-                                        Ok(_) => info!("Unique addresses updated"),
-                                        Err(e) => {
-                                            error!("Error updating unique addresses: {:?}", e)
-                                        }
+                                {
+                                    Ok(_) => info!("Unique addresses updated"),
+                                    Err(e) => {
+                                        error!("Error updating unique addresses: {:?}", e)
                                     }
                                 }
-                                Err(e) => error!("Error updating transactions: {:?}", e),
                             }
+                            Err(e) => error!("Error updating transactions: {:?}", e),
                         }
-                        common::AsylumMessage::PortfolioHoldings(holdings, timestamp_millis) => {
-                            debug!("{:?}", holdings.len());
-                            match Asylum::update_table_portfolio_holdings(
-                                &mut postgres_client,
-                                holdings,
-                                timestamp_millis,
-                            )
-                            .await
-                            {
-                                Ok(_) => info!("Portfolio holdings updated"),
-                                Err(e) => error!("Error updating portfolio holdings: {:?}", e),
-                            }
-                        }
-                        _ => (),
                     }
+                    common::AsylumMessage::PortfolioHoldings(holdings, timestamp_millis) => {
+                        debug!("{:?}", holdings.len());
+                        match Asylum::update_table_portfolio_holdings(
+                            &mut postgres_client,
+                            holdings,
+                            timestamp_millis,
+                        )
+                        .await
+                        {
+                            Ok(_) => info!("Portfolio holdings updated"),
+                            Err(e) => error!("Error updating portfolio holdings: {:?}", e),
+                        }
+                    }
+                    _ => (),
                 }
             }
             //
